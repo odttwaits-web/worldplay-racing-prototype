@@ -71,7 +71,8 @@ function icon(name) {
     list: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>',
     user: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
     clock: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
-    info: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>'
+    info: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>',
+    menu: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12M6 12h12M6 16h12"/></svg>'
   };
   return icons[name] || "";
 }
@@ -81,16 +82,10 @@ function header() {
     <header class="site-header">
       <button class="brand" data-route="/dashboard" aria-label="WorldPlay dashboard">
         <img src="./assets/worldplay-logo.svg" alt="" />
-        <span class="brand-word">WORLDPLAY</span>
+        <span class="brand-word">RACING EDITION</span>
       </button>
-      <nav class="desktop-nav" aria-label="Primary">
-        <button data-route="/dashboard">Competitions</button>
-        <button data-action="show-rules">How It Works</button>
-        <button data-action="show-coming-soon">Leaderboards</button>
-        <button data-action="show-coming-soon">Community</button>
-      </nav>
       <button class="profile-button" data-action="toggle-menu" aria-expanded="false">
-        <strong>Oscar</strong><span>OT</span>${icon("user")}
+        <strong>Oscar</strong><span aria-hidden="true">${icon("menu")}</span>
       </button>
     </header>
     <div class="account-drawer" aria-hidden="true">
@@ -167,6 +162,16 @@ function dashboard() {
           </div>
         </div>
         <div class="hero-live-chip"><span></span><strong>LIVE COMPETITIONS</strong><small>5 AVAILABLE</small></div>
+      </section>
+
+      <section class="page-section dashboard-overview-section" aria-label="Player overview">
+        <div class="dashboard-overview-card">
+          <div class="overview-greeting"><p class="eyebrow red">MY OVERVIEW</p><h2>GOOD AFTERNOON, OSCAR</h2></div>
+          <div class="overview-stat"><small>ACTIVE GAMES</small><strong>2</strong></div>
+          <div class="overview-stat"><small>BEST POSITION</small><strong>#24</strong></div>
+          <div class="overview-stat"><small>TOTAL POINTS</small><strong>675</strong></div>
+          <button class="outline-button small" data-route="/racing">View racing games${icon("arrow")}</button>
+        </div>
       </section>
 
       <section class="page-section arena-section" id="arena">
