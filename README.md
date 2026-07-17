@@ -40,4 +40,6 @@ npm test
 
 For hosted preview environments, set `HOST=0.0.0.0` and provide the platform's `PORT`. The preview must remain access-controlled while sample data, brand permissions and competition rules are under review.
 
+For a portable password-protected preview, set `PREVIEW_PASSWORD` and optionally `PREVIEW_USER` before starting the server. The `/health` endpoint remains available to hosting health checks without exposing the application.
+
 The AFL, NRL, NFL, and community competition tiles are presentation context only. Racing is the active prototype journey, reached exclusively through its tile in the dashboard sports section. This project does not connect to WorldPlay production systems. Local deadlines and entry persistence are browser-controlled and are therefore demonstration mechanics, not production security.
