@@ -175,11 +175,11 @@ function dashboard() {
           <button class="text-button" data-action="show-coming-soon">View all competitions →</button>
         </div>
         <div class="sport-arena-grid">
+          ${sportCard("racing", "RACING", "Melbourne Cup Top 10 + Spring Survivor", "$150K PRIZES", true)}
           ${sportCard("community", "COMMUNITY", "Create a league and play your way.", "FREE TO JOIN", false)}
           ${sportCard("afl", "AFL", "Finals predictor", "$10M + $250K", false)}
           ${sportCard("nrl", "NRL", "Finals predictor", "$5M + $150K", false)}
           ${sportCard("nfl", "NFL", "Playoff predictor", "$20M + $500K", false)}
-          ${sportCard("racing", "RACING", "Melbourne Cup Top 10 + Spring Survivor", "$150K PRIZES", true)}
         </div>
       </section>
 
