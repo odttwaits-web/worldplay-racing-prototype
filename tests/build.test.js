@@ -24,3 +24,10 @@ test("the hosted worker applies disclosure-safe security headers", async () => {
   assert.match(worker, /X-Frame-Options/);
   assert.match(worker, /\/health/);
 });
+
+test("the stakeholder dashboard includes the personalised home modules", async () => {
+  const client = await readFile(join(root, "dist/client/app.js"), "utf8");
+  for (const moduleName of ["YOUR GAMES", "COMING UP", "MY LEAGUES", "LATEST ACTIVITY", "WHAT TO KNOW"]) {
+    assert.match(client, new RegExp(moduleName));
+  }
+});

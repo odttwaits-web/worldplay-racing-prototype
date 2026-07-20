@@ -148,35 +148,95 @@ function gameMiniCard(game) {
 }
 
 function dashboard() {
+  const top10Route = state.top10Submitted && !state.top10Editing ? "/top10/submitted" : "/top10";
+  const survivorRoute = state.survivorSubmitted && !state.survivorEditing ? "/survivor/submitted" : "/survivor";
+  const top10Progress = Math.min(state.top10.length, 10);
+  const survivorSelection = runnerById(state.survivorSubmittedPick || state.survivorPick);
   return `
     ${header()}
-    <main id="app-main">
-      <section class="hero dashboard-hero worldplay-hero">
-        <div class="hero-content">
-          <p class="hero-kicker">THE FINAL WHISTLE BLEW.</p>
-          <h1>THE NEXT GAME<br><span>DOESN'T WAIT.</span></h1>
-          <p class="hero-copy">Free-to-play prediction games across the world's biggest sporting moments.</p>
-          <div class="hero-actions">
-            <button class="primary-button" data-action="scroll-arena">Explore sports${icon("arrow")}</button>
-            <button class="ghost-button" data-action="show-rules">How It Works</button>
+    <main id="app-main" class="dashboard-home">
+      <section class="home-command-hero">
+        <div class="home-command-inner">
+          <div class="home-welcome">
+            <p class="eyebrow red">YOUR WORLDPLAY</p>
+            <h1>GOOD AFTERNOON,<br><span>OSCAR.</span></h1>
+            <p>Everything you are playing, following and competing in—one place.</p>
+            <div class="home-quick-stats"><span><strong>4</strong> ACTIVE GAMES</span><span><strong>#24</strong> BEST RANK</span><span><strong>3</strong> LEAGUES</span></div>
           </div>
+          <article class="next-action-card">
+            <div class="next-action-top"><span class="live-dot"></span><small>NEXT ACTION · MELBOURNE CUP</small><span>${top10Progress}/10</span></div>
+            <h2>${top10Progress === 10 ? "YOUR TOP 10 IS READY" : `${10 - top10Progress} PICKS LEFT TO MAKE`}</h2>
+            <p>${top10Progress === 10 ? "Review your order before the field locks." : "Finish ranking the field before selections close."}</p>
+            <div class="action-progress"><span style="width:${top10Progress * 10}%"></span></div>
+            <div class="next-action-footer"><small>CLOSES 4 NOV · 2:55PM AEDT</small><button class="primary-button small" data-route="${top10Route}">${state.top10Submitted ? "View entry" : "Continue picking"}${icon("arrow")}</button></div>
+          </article>
         </div>
-        <div class="hero-live-chip"><span></span><strong>LIVE COMPETITIONS</strong><small>5 AVAILABLE</small></div>
       </section>
 
-      <section class="page-section dashboard-overview-section" aria-label="Player overview">
-        <div class="dashboard-overview-card">
-          <div class="overview-greeting"><p class="eyebrow red">MY OVERVIEW</p><h2>GOOD AFTERNOON, OSCAR</h2></div>
-          <div class="overview-stat"><small>ACTIVE GAMES</small><strong>2</strong></div>
-          <div class="overview-stat"><small>BEST POSITION</small><strong>#24</strong></div>
-          <div class="overview-stat"><small>TOTAL POINTS</small><strong>675</strong></div>
-          <button class="outline-button small" data-route="/racing">View racing games${icon("arrow")}</button>
+      <section class="page-section dashboard-content-grid">
+        <div class="dashboard-main-column">
+          <section class="dashboard-module your-games-module" aria-labelledby="your-games-heading">
+            <div class="module-heading"><div><p class="eyebrow red">YOUR COMPETITIONS</p><h2 id="your-games-heading">YOUR GAMES</h2></div><button class="text-button" data-action="scroll-arena">Find another game →</button></div>
+            <div class="active-games-grid">
+              ${dashboardGameCard("racing", "PICK THE TOP 10", state.top10Submitted ? "ENTRY SUBMITTED" : `${top10Progress}/10 SELECTED`, "Melbourne Cup · $100K", top10Progress * 10, top10Route, state.top10Submitted ? "View entry" : "Make picks")}
+              ${dashboardGameCard("survivor", "SPRING SURVIVOR", state.survivorSubmitted ? "PICK SUBMITTED" : survivorSelection ? "PICK SAVED" : "ROUND 1 OPEN", survivorSelection ? survivorSelection.name : "Makybe Diva Stakes Day", survivorSelection ? 100 : 0, survivorRoute, state.survivorSubmitted ? "View pick" : "Choose horse")}
+              ${dashboardGameCard("afl", "AFL FINALS", "ROUND OPEN", "Qualifying finals · $250K", 62, null, "View bracket")}
+              ${dashboardGameCard("nrl", "NRL FINALS", "UPCOMING", "Round 1 opens in 12 days", 0, null, "View game")}
+            </div>
+          </section>
+
+          <section class="dashboard-module upcoming-module" id="upcoming" aria-labelledby="upcoming-heading">
+            <div class="module-heading"><div><p class="eyebrow red">YOUR SCHEDULE</p><h2 id="upcoming-heading">COMING UP</h2></div><button class="text-button" data-route="/racing">Full racing calendar →</button></div>
+            <div class="upcoming-list">
+              ${upcomingItem("06", "SEP", "SURVIVOR · ROUND 1", "Makybe Diva Stakes Day", "Picks close 3:55PM", "action", "/survivor")}
+              ${upcomingItem("12", "SEP", "AFL FINALS", "Semi-final selections", "Picks close 7:20PM", "live")}
+              ${upcomingItem("20", "SEP", "SURVIVOR · ROUND 2", "Underwood Stakes Day", "Advancing players only", "upcoming", "/racing")}
+              ${upcomingItem("04", "NOV", "PICK THE TOP 10", "Melbourne Cup", "Picks close 2:55PM", "upcoming", "/top10")}
+            </div>
+          </section>
+
+          <section class="dashboard-module news-module" aria-labelledby="news-heading">
+            <div class="module-heading"><div><p class="eyebrow red">NEWS & INSIGHTS</p><h2 id="news-heading">WHAT TO KNOW</h2></div><button class="text-button" data-action="show-coming-soon">View all news →</button></div>
+            <div class="dashboard-news-grid">
+              ${newsCard("feature", "RACING", "Five horses to watch this Spring Carnival", "6 min read")}
+              ${newsCard("analysis", "ANALYSIS", "How the Top 10 scoring system rewards bold calls", "4 min read")}
+              ${newsCard("community", "COMMUNITY", "Inside Punt Road Legends: the league to beat", "3 min read")}
+            </div>
+          </section>
         </div>
+
+        <aside class="dashboard-sidebar" aria-label="Leagues and rankings">
+          <section class="sidebar-card rank-summary-card">
+            <div class="sidebar-heading"><p class="eyebrow red">YOUR RANK</p><span>GLOBAL</span></div>
+            <div class="rank-lockup"><strong>#24</strong><span><b>↑ 7</b> THIS WEEK<br>OF 96,441 PLAYERS</span></div>
+            <div class="rank-bar"><span></span></div>
+            <button class="outline-button full small" data-action="show-coming-soon">View leaderboard${icon("arrow")}</button>
+          </section>
+
+          <section class="sidebar-card leagues-card">
+            <div class="sidebar-heading"><div><p class="eyebrow red">SOCIAL</p><h2>MY LEAGUES</h2></div><button class="icon-button" data-action="show-coming-soon" aria-label="Create a league">+</button></div>
+            <div class="league-list">
+              ${leagueRow("PR", "Punt Road Legends", "24 members", "#3", "2 NEW")}
+              ${leagueRow("OF", "Office Footy Tips", "58 members", "#12", "FRI")}
+              ${leagueRow("SC", "Spring Carnival", "18 members", "#7", "LIVE")}
+            </div>
+            <button class="outline-button full small" data-action="show-coming-soon">Explore community leagues</button>
+          </section>
+
+          <section class="sidebar-card activity-card">
+            <div class="sidebar-heading"><div><p class="eyebrow red">LEAGUE FEED</p><h2>LATEST ACTIVITY</h2></div></div>
+            <ul>
+              <li><span class="activity-avatar">BK</span><p><strong>@sarah_k</strong> moved into 1st in Punt Road Legends.<small>12 min ago</small></p></li>
+              <li><span class="activity-avatar red">OT</span><p>Your Survivor pick was saved.<small>1 hr ago</small></p></li>
+              <li><span class="activity-avatar">MC</span><p><strong>@mcg_oracle</strong> joined Spring Carnival.<small>3 hrs ago</small></p></li>
+            </ul>
+          </section>
+        </aside>
       </section>
 
       <section class="page-section arena-section" id="arena">
         <div class="section-heading">
-          <div><p class="eyebrow red">FEATURED SPORTS</p><h2>CHOOSE YOUR ARENA</h2></div>
+          <div><p class="eyebrow red">DISCOVER</p><h2>FIND YOUR NEXT GAME</h2></div>
           <button class="text-button" data-action="show-coming-soon">View all competitions →</button>
         </div>
         <div class="sport-arena-grid">
@@ -188,34 +248,35 @@ function dashboard() {
         </div>
       </section>
 
-      <section class="dashboard-app-promo">
-        <div class="page-section dashboard-app-promo-inner">
-          <div>
-            <img src="./assets/worldplay-logo.svg" alt="" />
-            <p class="eyebrow">WORLDPLAY APP</p>
-            <h2>THE GAME IN<br>YOUR HANDS</h2>
-            <p>Build your picks, follow live results and climb the leaderboard from anywhere.</p>
-            <button class="primary-button" data-action="show-coming-soon">Download the app${icon("arrow")}</button>
-          </div>
-          <div class="app-promo-device"><span>WP</span><strong>LIVE PICKS</strong><small>TRACK EVERY RESULT</small></div>
-        </div>
-      </section>
-
-      <section class="page-section closing-section">
-        <div class="section-heading"><div><p class="eyebrow red">LIVE COMPETITIONS</p><h2>BRACKETS CLOSING SOON</h2></div></div>
-        <div class="closing-grid">
-          ${closingCard("AFL FINALS SERIES", "4D 06H 56M", "412,806", "$10M + $250K IN CASH")}
-          ${closingCard("NRL FINALS SERIES", "54D 21H 56M", "88,120", "$5M + $150K IN CASH")}
-          ${closingCard("NFL FINALS SERIES", "62D 21H 56M", "96,441", "$20M + $500K IN CASH")}
-        </div>
-      </section>
-
       <section class="page-section platform-stats">
         <div><strong>1.2M+</strong><span>PREDICTIONS MADE</span></div><div><strong>420K+</strong><span>PLAYERS</span></div><div><strong>412,806</strong><span>BRACKETS SO FAR</span></div><div><strong>85</strong><span>COUNTRIES</span></div>
       </section>
     </main>
     ${footer()}
   `;
+}
+
+function dashboardGameCard(kind, title, status, detail, progress, route, cta) {
+  const action = route ? `data-route="${route}"` : 'data-action="show-coming-soon"';
+  return `<article class="dashboard-game-card ${kind}">
+    <div class="dashboard-game-top"><span class="game-sport">${kind === "racing" || kind === "survivor" ? "RACING" : kind.toUpperCase()}</span><span class="game-state">${status}</span></div>
+    <h3>${title}</h3><p>${detail}</p>
+    <div class="game-progress"><span style="width:${progress}%"></span></div>
+    <button class="text-button" ${action}>${cta} →</button>
+  </article>`;
+}
+
+function upcomingItem(day, month, game, title, meta, status, route) {
+  const action = route ? `data-route="${route}"` : 'data-action="show-coming-soon"';
+  return `<article class="upcoming-item"><time><strong>${day}</strong><span>${month}</span></time><span class="schedule-line ${status}"></span><div><small>${game}</small><h3>${title}</h3><p>${meta}</p></div><button class="round-arrow" ${action} aria-label="Open ${title}">${icon("arrow")}</button></article>`;
+}
+
+function newsCard(kind, category, title, meta) {
+  return `<article class="dashboard-news-card ${kind}"><div class="news-art"></div><div><small>${category}</small><h3>${title}</h3><p>${meta}</p><button data-action="show-coming-soon" aria-label="Read ${title}">${icon("arrow")}</button></div></article>`;
+}
+
+function leagueRow(initials, name, members, rank, signal) {
+  return `<button class="league-row" data-action="show-coming-soon"><span class="league-mark">${initials}</span><span><strong>${name}</strong><small>${members}</small></span><span class="league-rank"><small>RANK</small><strong>${rank}</strong></span><em>${signal}</em></button>`;
 }
 
 function sportCard(kind, title, subtitle, prize, active) {
