@@ -26,6 +26,7 @@ const defaultState = {
 
 let state = loadState();
 let dragPayload = null;
+let dashboardSport = "all";
 
 function loadState() {
   try {
@@ -152,8 +153,39 @@ function dashboard() {
   const survivorRoute = state.survivorSubmitted && !state.survivorEditing ? "/survivor/submitted" : "/survivor";
   const top10Progress = Math.min(state.top10.length, 10);
   const survivorSelection = runnerById(state.survivorSubmittedPick || state.survivorPick);
+  const playerGames = [
+    { sport: "racing", html: dashboardGameCard("racing", "PICK THE TOP 10", state.top10Submitted ? "ENTRY SUBMITTED" : `${top10Progress}/10 SELECTED`, "Melbourne Cup · $100K", top10Progress * 10, top10Route, state.top10Submitted ? "View entry" : "Make picks") },
+    { sport: "racing", html: dashboardGameCard("survivor", "SPRING SURVIVOR", state.survivorSubmitted ? "PICK SUBMITTED" : survivorSelection ? "PICK SAVED" : "ROUND 1 OPEN", survivorSelection ? survivorSelection.name : "Makybe Diva Stakes Day", survivorSelection ? 100 : 0, survivorRoute, state.survivorSubmitted ? "View pick" : "Choose horse") },
+    { sport: "afl", html: dashboardGameCard("afl", "AFL FINALS", "ROUND OPEN", "Qualifying finals · $250K", 62, null, "View bracket") },
+    { sport: "nrl", html: dashboardGameCard("nrl", "NRL FINALS", "UPCOMING", "Round 1 opens in 12 days", 0, null, "View game") }
+  ];
+  const visibleGames = dashboardSport === "all" ? playerGames : playerGames.filter((game) => game.sport === dashboardSport);
+  const schedule = [
+    { sport: "racing", args: ["06", "SEP", "SURVIVOR · ROUND 1", "Makybe Diva Stakes Day", "Picks close 3:55PM", "action", "/survivor"] },
+    { sport: "afl", args: ["12", "SEP", "AFL FINALS", "Semi-final selections", "Picks close 7:20PM", "live"] },
+    { sport: "racing", args: ["20", "SEP", "SURVIVOR · ROUND 2", "Underwood Stakes Day", "Advancing players only", "upcoming", "/racing"] },
+    { sport: "nrl", args: ["26", "SEP", "NRL FINALS", "Preliminary final picks", "Picks close 7:40PM", "upcoming"] },
+    { sport: "nfl", args: ["05", "OCT", "NFL WEEKLY PICKS", "Week 5 selections", "Opens Monday 9:00AM", "upcoming"] },
+    { sport: "community", args: ["18", "OCT", "PUNT ROAD LEGENDS", "League rivalry round", "24 members competing", "upcoming"] },
+    { sport: "racing", args: ["04", "NOV", "PICK THE TOP 10", "Melbourne Cup", "Picks close 2:55PM", "upcoming", "/top10"] }
+  ];
+  const visibleSchedule = (dashboardSport === "all" ? schedule.slice(0, 4) : schedule.filter((item) => item.sport === dashboardSport)).slice(0,4);
+  const news = [
+    { sport: "racing", args: ["feature", "RACING", "Five horses to watch this Spring Carnival", "6 min read"] },
+    { sport: "racing", args: ["analysis", "ANALYSIS", "How the Top 10 scoring system rewards bold calls", "4 min read"] },
+    { sport: "afl", args: ["afl-news", "AFL", "The finals matchups that could break your bracket", "5 min read"] },
+    { sport: "afl", args: ["analysis", "AFL ANALYSIS", "Three calls separating the leading predictors", "4 min read"] },
+    { sport: "nrl", args: ["nrl-news", "NRL", "Form guide: the road to the preliminary finals", "5 min read"] },
+    { sport: "nrl", args: ["analysis", "NRL ANALYSIS", "Where this week's margins may be won", "3 min read"] },
+    { sport: "nfl", args: ["nfl-news", "NFL", "Early playoff contenders to keep on your radar", "6 min read"] },
+    { sport: "nfl", args: ["analysis", "NFL ANALYSIS", "The matchups shaping the weekly picks", "4 min read"] },
+    { sport: "community", args: ["community", "COMMUNITY", "Inside Punt Road Legends: the league to beat", "3 min read"] },
+    { sport: "community", args: ["community", "LEAGUE STORIES", "How Office Footy Tips keeps the rivalry alive", "4 min read"] }
+  ];
+  const visibleNews = dashboardSport === "all" ? [news[0], news[2], news[8]] : news.filter((item) => item.sport === dashboardSport);
   return `
     ${header()}
+    ${sportsRail()}
     <main id="app-main" class="dashboard-home">
       <section class="home-command-hero">
         <div class="home-command-inner">
@@ -178,29 +210,21 @@ function dashboard() {
           <section class="dashboard-module your-games-module" aria-labelledby="your-games-heading">
             <div class="module-heading"><div><p class="eyebrow red">YOUR COMPETITIONS</p><h2 id="your-games-heading">YOUR GAMES</h2></div><button class="text-button" data-action="scroll-arena">Find another game →</button></div>
             <div class="active-games-grid">
-              ${dashboardGameCard("racing", "PICK THE TOP 10", state.top10Submitted ? "ENTRY SUBMITTED" : `${top10Progress}/10 SELECTED`, "Melbourne Cup · $100K", top10Progress * 10, top10Route, state.top10Submitted ? "View entry" : "Make picks")}
-              ${dashboardGameCard("survivor", "SPRING SURVIVOR", state.survivorSubmitted ? "PICK SUBMITTED" : survivorSelection ? "PICK SAVED" : "ROUND 1 OPEN", survivorSelection ? survivorSelection.name : "Makybe Diva Stakes Day", survivorSelection ? 100 : 0, survivorRoute, state.survivorSubmitted ? "View pick" : "Choose horse")}
-              ${dashboardGameCard("afl", "AFL FINALS", "ROUND OPEN", "Qualifying finals · $250K", 62, null, "View bracket")}
-              ${dashboardGameCard("nrl", "NRL FINALS", "UPCOMING", "Round 1 opens in 12 days", 0, null, "View game")}
+              ${visibleGames.length ? visibleGames.map((game) => game.html).join("") : emptySportState()}
             </div>
           </section>
 
           <section class="dashboard-module upcoming-module" id="upcoming" aria-labelledby="upcoming-heading">
             <div class="module-heading"><div><p class="eyebrow red">YOUR SCHEDULE</p><h2 id="upcoming-heading">COMING UP</h2></div><button class="text-button" data-route="/racing">Full racing calendar →</button></div>
             <div class="upcoming-list">
-              ${upcomingItem("06", "SEP", "SURVIVOR · ROUND 1", "Makybe Diva Stakes Day", "Picks close 3:55PM", "action", "/survivor")}
-              ${upcomingItem("12", "SEP", "AFL FINALS", "Semi-final selections", "Picks close 7:20PM", "live")}
-              ${upcomingItem("20", "SEP", "SURVIVOR · ROUND 2", "Underwood Stakes Day", "Advancing players only", "upcoming", "/racing")}
-              ${upcomingItem("04", "NOV", "PICK THE TOP 10", "Melbourne Cup", "Picks close 2:55PM", "upcoming", "/top10")}
+              ${visibleSchedule.length ? visibleSchedule.map((item) => upcomingItem(...item.args)).join("") : emptyScheduleState()}
             </div>
           </section>
 
           <section class="dashboard-module news-module" aria-labelledby="news-heading">
             <div class="module-heading"><div><p class="eyebrow red">NEWS & INSIGHTS</p><h2 id="news-heading">WHAT TO KNOW</h2></div><button class="text-button" data-action="show-coming-soon">View all news →</button></div>
             <div class="dashboard-news-grid">
-              ${newsCard("feature", "RACING", "Five horses to watch this Spring Carnival", "6 min read")}
-              ${newsCard("analysis", "ANALYSIS", "How the Top 10 scoring system rewards bold calls", "4 min read")}
-              ${newsCard("community", "COMMUNITY", "Inside Punt Road Legends: the league to beat", "3 min read")}
+              ${visibleNews.map((item) => newsCard(...item.args)).join("")}
             </div>
           </section>
         </div>
@@ -231,6 +255,13 @@ function dashboard() {
               <li><span class="activity-avatar">MC</span><p><strong>@mcg_oracle</strong> joined Spring Carnival.<small>3 hrs ago</small></p></li>
             </ul>
           </section>
+
+          <section class="sidebar-card x-feed-card">
+            <div class="sidebar-heading"><div><p class="eyebrow red">SOCIAL FEED</p><h2>FROM WORLDPLAY</h2></div><span class="x-mark">𝕏</span></div>
+            <article class="x-post"><div><strong>@WorldPlay</strong><small>· 18m</small></div><p>The Spring Carnival is coming. Two new games, ten meetings and plenty of bragging rights.</p><span>12 replies · 34 reposts · 186 likes</span></article>
+            <article class="x-post"><div><strong>@WorldPlay</strong><small>· 3h</small></div><p>Finals pressure is building. Have you locked in your latest AFL calls?</p><span>8 replies · 21 reposts · 104 likes</span></article>
+            <button class="outline-button full small" data-action="show-coming-soon">View more on X${icon("arrow")}</button>
+          </section>
         </aside>
       </section>
 
@@ -254,6 +285,21 @@ function dashboard() {
     </main>
     ${footer()}
   `;
+}
+
+function sportsRail() {
+  const sports = [
+    ["all", "ALL GAMES"], ["racing", "RACING"], ["afl", "AFL"], ["nrl", "NRL"], ["nfl", "NFL"], ["community", "COMMUNITY"]
+  ];
+  return `<nav class="sports-rail" aria-label="Browse games by sport"><div class="sports-rail-inner"><span class="sports-rail-label">BROWSE</span>${sports.map(([id, label]) => `<button class="${dashboardSport === id ? "active" : ""}" data-action="sport-filter" data-sport="${id}" ${dashboardSport === id ? 'aria-current="page"' : ""}>${label}</button>`).join("")}<button class="sports-search" data-action="show-coming-soon" aria-label="Search games">⌕</button></div></nav>`;
+}
+
+function emptySportState() {
+  return `<div class="empty-dashboard-state"><span>${icon("trophy")}</span><div><h3>NO ACTIVE GAMES HERE YET</h3><p>Explore upcoming competitions and join your next challenge.</p></div><button class="outline-button small" data-action="scroll-arena">Browse games</button></div>`;
+}
+
+function emptyScheduleState() {
+  return `<div class="empty-schedule-state"><strong>YOU'RE ALL CLEAR</strong><span>No upcoming deadlines in this category.</span></div>`;
 }
 
 function dashboardGameCard(kind, title, status, detail, progress, route, cta) {
@@ -628,6 +674,10 @@ document.addEventListener("click", (event) => {
   if (action === "toggle-menu") toggleMenu();
   if (action === "show-rules") { toggleMenu(false); showRules(); }
   if (action === "show-coming-soon") toast("This competition is shown for context — racing is the active prototype.");
+  if (action === "sport-filter") {
+    dashboardSport = target.dataset.sport || "all";
+    render({ preserveScroll: true });
+  }
   if (action === "scroll-arena") document.querySelector("#arena")?.scrollIntoView({ behavior: "smooth" });
   if (action === "close-modal") closeModal();
   if (action === "add-top10") addTop10(id);

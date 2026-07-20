@@ -101,6 +101,18 @@ h1, h2, h3 { margin: 0; font-family: var(--condensed); font-weight: 900; text-tr
 .hero-live-chip strong { font: 700 10px/1 var(--compact-font); letter-spacing: .08em; }
 .hero-live-chip small { color: var(--muted); font-size: 7px; letter-spacing: .12em; }
 
+.sports-rail { min-height: 46px; position: sticky; top: 72px; z-index: 85; border-top: 1px solid rgba(255,255,255,.04); border-bottom: 1px solid rgba(255,255,255,.11); background: rgba(12,12,13,.95); backdrop-filter: blur(18px); }
+.sports-rail-inner { width: min(1440px,calc(100% - 32px)); min-height: 45px; margin: auto; display: flex; align-items: stretch; overflow-x: auto; scrollbar-width: none; }
+.sports-rail-inner::-webkit-scrollbar { display: none; }
+.sports-rail-label { flex: 0 0 auto; padding-right: 21px; display: flex; align-items: center; border-right: 1px solid rgba(255,255,255,.11); color: #666; font: 700 7px/1 var(--compact-font); letter-spacing: .16em; }
+.sports-rail button { flex: 0 0 auto; min-width: 84px; padding: 0 18px; position: relative; border: 0; background: transparent; color: #8e8d91; cursor: pointer; font: 700 9px/1 var(--button-font); letter-spacing: .035em; transition: color .18s,background .18s; }
+.sports-rail button::after { content: ""; position: absolute; left: 18px; right: 18px; bottom: 0; height: 2px; transform: scaleX(0); background: var(--red); transition: transform .18s; }
+.sports-rail button:hover { color: #fff; background: rgba(255,255,255,.025); }
+.sports-rail button.active { color: #fff; }
+.sports-rail button.active::after { transform: scaleX(1); }
+.sports-rail .sports-search { min-width: 46px; width: 46px; margin-left: auto; padding: 0; border-left: 1px solid rgba(255,255,255,.1); color: #fff; font: 400 21px/1 var(--font); }
+.sports-rail .sports-search::after { display: none; }
+
 .home-command-hero { min-height: 338px; position: relative; isolation: isolate; display: grid; align-items: center; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,.09); background: #0b0b0c; }
 .home-command-hero::before { content: ""; position: absolute; z-index: -2; inset: 0; background: linear-gradient(90deg,#09090b 0%,rgba(9,9,11,.93) 43%,rgba(9,9,11,.5) 73%,rgba(9,9,11,.86)), url("./assets/worldplay-stadium.webp") center 48% / cover no-repeat; opacity: .88; }
 .home-command-hero::after { content: ""; position: absolute; z-index: -1; inset: -15% -5% -20% 40%; background: radial-gradient(ellipse at center,rgba(255,23,39,.18),transparent 65%); }
@@ -151,6 +163,10 @@ h1, h2, h3 { margin: 0; font-family: var(--condensed); font-weight: 900; text-tr
 .dashboard-game-card .game-progress { margin: auto 0 12px; }
 .dashboard-game-card .text-button { width: fit-content; padding: 0; }
 .dashboard-game-card.survivor .game-progress span { background: var(--lime); }
+.empty-dashboard-state { min-height: 181px; grid-column: 1 / -1; padding: 24px; display: grid; grid-template-columns: 45px 1fr auto; align-items: center; gap: 18px; border: 1px dashed rgba(255,255,255,.17); border-radius: 8px; background: rgba(255,255,255,.018); }
+.empty-dashboard-state > span { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,.05); color: var(--red); }
+.empty-dashboard-state h3 { font-size: 24px; }
+.empty-dashboard-state p { margin: 6px 0 0; color: var(--muted); font-size: 9px; }
 
 .upcoming-list { display: grid; }
 .upcoming-item { min-height: 82px; display: grid; grid-template-columns: 54px 10px 1fr 36px; align-items: center; gap: 14px; border-top: 1px solid rgba(255,255,255,.09); }
@@ -166,12 +182,18 @@ h1, h2, h3 { margin: 0; font-family: var(--condensed); font-weight: 900; text-tr
 .upcoming-item p { margin: 0; color: var(--muted); font-size: 8px; }
 .round-arrow { width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.18); border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; }
 .round-arrow:hover { border-color: var(--red); color: #fff; }
+.empty-schedule-state { min-height: 98px; display: grid; place-items: center; align-content: center; gap: 7px; border-top: 1px solid rgba(255,255,255,.09); color: var(--muted); text-align: center; }
+.empty-schedule-state strong { color: #fff; font: 900 20px/1 var(--condensed); }
+.empty-schedule-state span { font-size: 9px; }
 
-.dashboard-news-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 10px; }
+.dashboard-news-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(210px,1fr)); gap: 10px; }
 .dashboard-news-card { min-height: 230px; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; background: #181818; }
 .news-art { height: 108px; background: linear-gradient(0deg,rgba(0,0,0,.25),transparent),url("./assets/racing-hero.png") center 37% / cover no-repeat; }
 .dashboard-news-card.analysis .news-art { background-image: linear-gradient(0deg,rgba(0,0,0,.3),transparent),url("./assets/worldplay-stadium.webp"); }
 .dashboard-news-card.community .news-art { background-image: linear-gradient(0deg,rgba(100,0,8,.25),transparent),url("./assets/worldplay-dashboard-promo.jpg"); }
+.dashboard-news-card.afl-news .news-art { background-image: linear-gradient(0deg,rgba(83,8,13,.38),transparent),url("./assets/worldplay-banner-player.png"); background-position: center 25%; }
+.dashboard-news-card.nrl-news .news-art { background-image: linear-gradient(0deg,rgba(0,57,54,.4),transparent),url("./assets/worldplay-stadium.webp"); }
+.dashboard-news-card.nfl-news .news-art { background-image: linear-gradient(0deg,rgba(21,64,36,.42),transparent),url("./assets/worldplay-dashboard-promo.jpg"); }
 .dashboard-news-card > div:last-child { min-height: 120px; padding: 12px 42px 12px 13px; position: relative; }
 .dashboard-news-card small { color: var(--red); font: 700 7px/1 var(--compact-font); letter-spacing: .12em; }
 .dashboard-news-card h3 { margin: 7px 0 10px; font-size: 19px; line-height: 1; }
@@ -200,6 +222,14 @@ h1, h2, h3 { margin: 0; font-family: var(--condensed); font-weight: 900; text-tr
 .activity-card p { margin: 1px 0 0; color: var(--warm); font-size: 9px; line-height: 1.4; }
 .activity-card p strong { color: #fff; }
 .activity-card p small { display: block; margin-top: 5px; color: var(--muted); font-size: 7px; }
+.x-mark { width: 31px; height: 31px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.22); border-radius: 50%; color: #fff !important; font-size: 14px !important; }
+.x-post { padding: 14px 0; border-top: 1px solid rgba(255,255,255,.09); }
+.x-post > div { display: flex; gap: 5px; align-items: baseline; }
+.x-post strong { font-size: 9px; }
+.x-post small, .x-post > span { color: var(--muted); font-size: 7px; }
+.x-post p { margin: 8px 0 10px; color: var(--warm); font-size: 9px; line-height: 1.55; }
+.x-post > span { display: block; }
+.x-feed-card > .outline-button { margin-top: 14px; }
 
 .page-section { width: min(1440px, calc(100% - 32px)); margin: 0 auto; padding: 56px 0; }
 .game-workspace { width: min(1024px, calc(100% - 32px)); margin: 0 auto; padding: 56px 0; }
@@ -562,7 +592,7 @@ dd { margin: 0; font-size: 11px; font-weight: 800; text-align: right; }
   .home-command-inner { grid-template-columns: 1fr minmax(340px,.8fr); gap: 30px; }
   .dashboard-content-grid { grid-template-columns: 1fr; }
   .dashboard-sidebar { position: static; grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .activity-card { grid-column: 1 / -1; }
+  .activity-card, .x-feed-card { grid-column: 1 / -1; }
   .activity-card ul { grid-template-columns: repeat(3,1fr); gap: 14px; }
   .activity-card li { border-top: 1px solid rgba(255,255,255,.09); }
   .dashboard-overview-card { grid-template-columns: 1.4fr repeat(3,.55fr); }
@@ -595,6 +625,12 @@ dd { margin: 0; font-size: 11px; font-weight: 800; text-align: right; }
   .brand img { width: 51px; }
   .brand-word { font-size: 18px; }
   .profile-button { margin-left: auto; }
+  .sports-rail { top: 64px; }
+  .sports-rail-inner { width: 100%; padding: 0 14px; }
+  .sports-rail-label { display: none; }
+  .sports-rail button { min-width: auto; padding: 0 16px; }
+  .sports-rail button::after { left: 16px; right: 16px; }
+  .sports-rail .sports-search { display: none; }
   .home-command-hero { min-height: auto; }
   .home-command-inner { padding: 38px 0 28px; grid-template-columns: 1fr; gap: 26px; }
   .home-welcome h1 { font-size: clamp(49px,15.5vw,68px); }
@@ -610,12 +646,13 @@ dd { margin: 0; font-size: 11px; font-weight: 800; text-align: right; }
   .module-heading .text-button { display: none; }
   .active-games-grid { display: flex; overflow-x: auto; margin-right: -17px; padding: 0 17px 8px 0; scroll-snap-type: x mandatory; }
   .dashboard-game-card { min-width: min(82vw,310px); scroll-snap-align: start; }
+  .empty-dashboard-state { min-width: calc(100vw - 62px); min-height: 220px; grid-template-columns: 1fr; justify-items: start; }
   .upcoming-item { grid-template-columns: 47px 8px 1fr 32px; gap: 9px; }
   .upcoming-item h3 { font-size: 18px; }
   .dashboard-news-grid { display: flex; overflow-x: auto; margin-right: -17px; padding: 0 17px 8px 0; scroll-snap-type: x mandatory; }
   .dashboard-news-card { min-width: min(78vw,285px); scroll-snap-align: start; }
   .dashboard-sidebar { grid-template-columns: 1fr; }
-  .activity-card { grid-column: auto; }
+  .activity-card, .x-feed-card { grid-column: auto; }
   .activity-card ul { grid-template-columns: 1fr; }
   .hero { min-height: 590px; align-items: flex-end; padding: 70px 22px 82px; }
   .dashboard-hero { background-image: linear-gradient(0deg, #09090b 8%, rgba(9,9,11,.7) 62%, rgba(9,9,11,.22)), url("./assets/worldplay-stadium.webp"); background-position: center; }
