@@ -83,7 +83,6 @@ function header() {
     <header class="site-header">
       <button class="brand" data-route="/dashboard" aria-label="WorldPlay dashboard">
         <img src="./assets/worldplay-logo.svg" alt="" />
-        <span class="brand-word">RACING EDITION</span>
       </button>
       <button class="profile-button" data-action="toggle-menu" aria-expanded="false">
         <strong>Oscar</strong><span aria-hidden="true">${icon("menu")}</span>
@@ -183,6 +182,10 @@ function dashboard() {
     { sport: "community", args: ["community", "LEAGUE STORIES", "How Office Footy Tips keeps the rivalry alive", "4 min read"] }
   ];
   const visibleNews = dashboardSport === "all" ? [news[0], news[2], news[8]] : news.filter((item) => item.sport === dashboardSport);
+  const sportNames = { all: "ALL", racing: "RACING", afl: "AFL", nrl: "NRL", nfl: "NFL", community: "COMMUNITY" };
+  const activeSportName = sportNames[dashboardSport] || "ALL";
+  const scheduleAction = dashboardSport === "racing" ? 'data-route="/racing"' : 'data-action="show-coming-soon"';
+  const scheduleLabel = dashboardSport === "all" ? "View all deadlines" : `${activeSportName} calendar`;
   return `
     ${header()}
     ${sportsRail()}
@@ -208,14 +211,14 @@ function dashboard() {
       <section class="page-section dashboard-content-grid">
         <div class="dashboard-main-column">
           <section class="dashboard-module your-games-module" aria-labelledby="your-games-heading">
-            <div class="module-heading"><div><p class="eyebrow red">YOUR COMPETITIONS</p><h2 id="your-games-heading">YOUR GAMES</h2></div><button class="text-button" data-action="scroll-arena">Find another game →</button></div>
+            <div class="module-heading"><div><p class="eyebrow red">${dashboardSport === "all" ? "YOUR COMPETITIONS" : `${activeSportName} COMPETITIONS`}</p><h2 id="your-games-heading">YOUR GAMES</h2></div><button class="text-button" data-action="scroll-arena">Find another game →</button></div>
             <div class="active-games-grid">
               ${visibleGames.length ? visibleGames.map((game) => game.html).join("") : emptySportState()}
             </div>
           </section>
 
           <section class="dashboard-module upcoming-module" id="upcoming" aria-labelledby="upcoming-heading">
-            <div class="module-heading"><div><p class="eyebrow red">YOUR SCHEDULE</p><h2 id="upcoming-heading">COMING UP</h2></div><button class="text-button" data-route="/racing">Full racing calendar →</button></div>
+            <div class="module-heading"><div><p class="eyebrow red">YOUR SCHEDULE</p><h2 id="upcoming-heading">COMING UP</h2></div><button class="text-button" ${scheduleAction}>${scheduleLabel} →</button></div>
             <div class="upcoming-list">
               ${visibleSchedule.length ? visibleSchedule.map((item) => upcomingItem(...item.args)).join("") : emptyScheduleState()}
             </div>
@@ -291,7 +294,7 @@ function sportsRail() {
   const sports = [
     ["all", "ALL GAMES"], ["racing", "RACING"], ["afl", "AFL"], ["nrl", "NRL"], ["nfl", "NFL"], ["community", "COMMUNITY"]
   ];
-  return `<nav class="sports-rail" aria-label="Browse games by sport"><div class="sports-rail-inner"><span class="sports-rail-label">BROWSE</span>${sports.map(([id, label]) => `<button class="${dashboardSport === id ? "active" : ""}" data-action="sport-filter" data-sport="${id}" ${dashboardSport === id ? 'aria-current="page"' : ""}>${label}</button>`).join("")}<button class="sports-search" data-action="show-coming-soon" aria-label="Search games">⌕</button></div></nav>`;
+  return `<nav class="sports-rail" aria-label="Games by sport"><div class="sports-rail-inner">${sports.map(([id, label]) => `<button class="${dashboardSport === id ? "active" : ""}" data-action="sport-filter" data-sport="${id}" ${dashboardSport === id ? 'aria-current="page"' : ""}>${label}</button>`).join("")}</div></nav>`;
 }
 
 function emptySportState() {

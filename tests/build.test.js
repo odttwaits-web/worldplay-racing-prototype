@@ -30,4 +30,7 @@ test("the stakeholder dashboard includes the personalised home modules", async (
   for (const moduleName of ["ALL GAMES", "RACING", "AFL", "NRL", "YOUR GAMES", "COMING UP", "MY LEAGUES", "LATEST ACTIVITY", "WHAT TO KNOW", "FROM WORLDPLAY"]) {
     assert.match(client, new RegExp(moduleName));
   }
+  assert.doesNotMatch(client, /RACING EDITION/);
+  assert.doesNotMatch(client, /sports-search/);
+  assert.doesNotMatch(client, />BROWSE</);
 });
