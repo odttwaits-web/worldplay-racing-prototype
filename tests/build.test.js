@@ -80,4 +80,8 @@ test("the league hub supports every sport and core social league task", async ()
   assert.match(client, /leagueActivity/);
   assert.match(client, /leagueMembers/);
   assert.match(client, /STEP 1 OF 4/);
+  assert.match(client, /YOUR CROWD/);
+  assert.match(client, /Share via SMS/);
+  assert.match(client, /league-mobile-action/);
+  assert.match(client, /data-mode="discover"/);
 });

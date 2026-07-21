@@ -42,6 +42,7 @@ let state = loadState();
 let dragPayload = null;
 let dashboardSport = "all";
 let leagueDetailTab = "overview";
+let leagueHubMode = "my";
 let leagueCreateStep = 1;
 let leagueDraft = { name: "", sport: "racing", games: [], privacy: "private" };
 
@@ -492,7 +493,7 @@ function playerLeagueCard(league) {
   return `<button class="player-league-card ${league.sport}" data-route="/leagues/${league.sport}/${league.id}" aria-label="Open ${league.name}">
     <div class="player-league-card-top"><span class="league-sport-tag">${sportLabel}</span><span>${league.privacy}</span></div>
     <div class="league-card-identity"><span class="league-large-mark ${league.tone}">${league.initials}</span><div><h3>${league.name}</h3><p>${league.members} members</p></div></div>
-    <div class="league-card-stats"><span><small>YOUR RANK</small><strong>#${league.rank}</strong></span><span><small>MOVEMENT</small><strong class="${movementClass}">${league.movement}</strong></span><span><small>LEADER</small><strong>${league.leader}</strong></span></div>
+    <div class="league-card-stats"><span><small>YOUR RANK</small><strong>#${league.rank}</strong></span><span><small>THIS ROUND</small><strong class="${movementClass}">${league.movement}</strong></span></div>
     <div class="league-games-line">${(league.games || []).slice(0,2).map((game) => `<span>${game}</span>`).join("")}</div>
     <div class="league-next"><span><small>NEXT ACTION</small><strong>${league.deadline}</strong></span><span>OPEN LEAGUE${icon("arrow")}</span></div>
   </button>`;
@@ -513,9 +514,9 @@ function discoverLeagueCard(league) {
 function leagueModeNav() {
   const inviteCount = state.acceptedLeagueInvites.includes("office-footy") ? 0 : 1;
   return `<nav class="league-mode-nav" aria-label="League tasks">
-    <button data-action="league-section" data-section="my-leagues"><span>MY LEAGUES</span><strong>${allPlayerLeagues().length}</strong></button>
-    <button data-action="league-section" data-section="discover-leagues"><span>DISCOVER</span><strong>24</strong></button>
-    <button data-action="league-section" data-section="league-invites"><span>INVITES</span><strong>${inviteCount}</strong></button>
+    <button class="${leagueHubMode === "my" ? "active" : ""}" data-action="league-section" data-mode="my" data-section="my-leagues" ${leagueHubMode === "my" ? 'aria-current="page"' : ""}><span>MY LEAGUES</span><strong>${allPlayerLeagues().length}</strong></button>
+    <button class="${leagueHubMode === "discover" ? "active" : ""}" data-action="league-section" data-mode="discover" data-section="discover-leagues" ${leagueHubMode === "discover" ? 'aria-current="page"' : ""}><span>DISCOVER</span><strong>24</strong></button>
+    <button class="${leagueHubMode === "invites" ? "active" : ""}" data-action="league-section" data-mode="invites" data-section="league-invites" ${leagueHubMode === "invites" ? 'aria-current="page"' : ""}><span>INVITES</span><strong>${inviteCount}</strong></button>
   </nav>`;
 }
 
@@ -610,20 +611,22 @@ function leagueActivity(league) {
     ["YESTERDAY", "NEW MEMBER", "@inside_gate joined the league", "Invited by @cupday_club."],
     ["2 DAYS", "LEAGUE UPDATE", "Round 1 selections are now open", "Every member has until 12:15PM on 6 September to submit." ]
   ];
-  return `<section class="league-tab-panel activity-panel"><div class="league-panel-heading"><div><p class="eyebrow red">WHAT'S HAPPENING</p><h2>LEAGUE ACTIVITY</h2><p>Results, movements and updates from ${league.name}.</p></div><button class="outline-button small" data-action="copy-invite">Share invite${icon("arrow")}</button></div><div class="league-activity-feed">${items.map(([time,type,title,copy],index) => `<article><span>${String(index+1).padStart(2,"0")}</span><div><small>${type} · ${time}</small><h3>${title}</h3><p>${copy}</p></div>${index === 1 ? `<em>+5</em>` : ""}</article>`).join("")}</div></section>`;
+  return `<section class="league-tab-panel activity-panel"><div class="league-panel-heading"><div><p class="eyebrow red">WHAT'S HAPPENING</p><h2>LEAGUE ACTIVITY</h2><p>Results, movements and updates from ${league.name}.</p></div><button class="outline-button small" data-action="copy-invite" data-league-id="${league.id}">Share invite${icon("arrow")}</button></div><div class="league-activity-feed">${items.map(([time,type,title,copy],index) => `<article><span>${String(index+1).padStart(2,"0")}</span><div><small>${type} · ${time}</small><h3>${title}</h3><p>${copy}</p></div>${index === 1 ? `<em>+5</em>` : ""}</article>`).join("")}</div></section>`;
 }
 
 function leagueMembers(league) {
   const members = springCarnivalStandings.slice(0,7);
-  return `<section class="league-tab-panel members-panel"><div class="league-panel-heading"><div><p class="eyebrow red">THE FIELD</p><h2>${league.members} MEMBERS</h2><p>Invite mates, review membership and see who is active.</p></div><button class="primary-button small" data-action="copy-invite">Invite players</button></div><div class="league-member-list">${members.map((member,index) => `<article><i>${member.initials}</i><div><strong>${member.name}</strong><small>${index === 0 ? "COMMISSIONER" : index < 4 ? "ACTIVE TODAY" : "ACTIVE THIS WEEK"}</small></div><span>#${member.rank}</span></article>`).join("")}</div><div class="league-admin-note"><span>${icon("info")}</span><p><strong>Commissioner tools</strong> let league owners approve requests, appoint co-admins and manage membership. This prototype keeps those controls lightweight.</p></div></section>`;
+  return `<section class="league-tab-panel members-panel"><div class="league-panel-heading"><div><p class="eyebrow red">THE FIELD</p><h2>${league.members} MEMBERS</h2><p>Invite mates, review membership and see who is active.</p></div><button class="primary-button small" data-action="copy-invite" data-league-id="${league.id}">Invite players</button></div><div class="league-member-list">${members.map((member,index) => `<article><i>${member.initials}</i><div><strong>${member.name}</strong><small>${index === 0 ? "COMMISSIONER" : index < 4 ? "ACTIVE TODAY" : "ACTIVE THIS WEEK"}</small></div><span>#${member.rank}</span></article>`).join("")}</div><div class="league-admin-note"><span>${icon("info")}</span><p><strong>Commissioner tools</strong> let league owners approve requests, appoint co-admins and manage membership. This prototype keeps those controls lightweight.</p></div></section>`;
 }
 
 function leagueDetail(league) {
   const tabContent = leagueDetailTab === "standings" ? leagueStandings(league) : leagueDetailTab === "activity" ? leagueActivity(league) : leagueDetailTab === "members" ? leagueMembers(league) : leagueOverview(league);
+  const playRoute = league.sport === "racing" ? "/survivor" : league.sport === "afl" ? "/afl-round" : league.sport === "nfl" ? "/nfl-pick6" : "/dashboard";
   return `${header()}${leagueSportNav(league.sport)}<main id="app-main" class="league-detail-page ${league.sport}">
-    <section class="league-detail-hero"><div class="league-detail-hero-inner"><button class="back-link" data-route="/leagues/${league.sport}">← Back to ${league.sport} leagues</button><div class="league-detail-title"><span class="league-large-mark ${league.tone || ""}">${league.initials}</span><div><p class="eyebrow ${league.sport === "racing" ? "lime-copy" : "red"}">${league.sport.toUpperCase()} · ${league.privacy || "COMMUNITY"}</p><h1>${league.name}</h1><p>${league.members} members · Led by ${league.leader || "YOU"} · ${(league.games || []).join(" + ")}</p></div></div><div class="league-detail-actions"><button class="ghost-button" data-action="copy-invite">Share invite</button><button class="primary-button" data-route="${league.sport === "racing" ? "/survivor" : league.sport === "afl" ? "/afl-round" : league.sport === "nfl" ? "/nfl-pick6" : "/dashboard"}">Make picks${icon("arrow")}</button></div></div></section>
+    <section class="league-detail-hero"><div class="league-detail-hero-inner"><button class="back-link" data-route="/leagues/${league.sport}">← Back to ${league.sport} leagues</button><div class="league-detail-title"><span class="league-large-mark ${league.tone || ""}">${league.initials}</span><div><p class="eyebrow ${league.sport === "racing" ? "lime-copy" : "red"}">${league.sport.toUpperCase()} · ${league.privacy || "COMMUNITY"}</p><h1>${league.name}</h1><p>${league.members} members · Led by ${league.leader || "YOU"} · ${(league.games || []).join(" + ")}</p></div></div><div class="league-detail-actions"><button class="ghost-button" data-action="copy-invite" data-league-id="${league.id}">Share invite</button><button class="primary-button" data-route="${playRoute}">Make picks${icon("arrow")}</button></div></div></section>
     <div class="league-detail-nav-wrap">${leagueDetailNav(leagueDetailTab)}</div>
     <section class="page-section league-tab-content">${tabContent}</section>
+    <div class="league-mobile-action" aria-label="League actions"><button class="ghost-button" data-action="copy-invite" data-league-id="${league.id}">Share</button><button class="primary-button" data-route="${playRoute}">Make picks${icon("arrow")}</button></div>
   </main>${footer()}`;
 }
 
@@ -999,6 +1002,11 @@ function showCreateLeague(step = 1) {
   openLeagueModal(`<section class="league-modal create-league-modal" aria-labelledby="create-league-title"><button class="modal-close" data-action="close-modal" aria-label="Close">×</button>${createStepIndicator()}${body}<div class="league-modal-actions">${leagueCreateStep > 1 ? `<button class="ghost-button" data-action="create-league-back">Back</button>` : `<button class="ghost-button" data-action="close-modal">Cancel</button>`}<button class="primary-button" data-action="${leagueCreateStep === 4 ? "finish-create-league" : "create-league-next"}">${leagueCreateStep === 4 ? "Create league" : "Continue"}${icon("arrow")}</button></div></section>`);
 }
 
+function showCreatedLeague(league) {
+  const inviteUrl = `https://worldplay.com/join/${league.id}`;
+  openLeagueModal(`<section class="league-modal league-created-modal" aria-labelledby="league-created-title"><button class="modal-close" data-action="open-created-league" data-league-id="${league.id}" aria-label="Close">×</button><span class="created-success-icon">${icon("check")}</span><p class="eyebrow red">LEAGUE CREATED</p><h2 id="league-created-title">YOUR CROWD<br>IS READY.</h2><p>${league.name} is live. Invite your players now, or head into the league and share it later.</p><div class="created-league-card"><span class="league-large-mark ${league.tone}">${league.initials}</span><div><small>${league.sport.toUpperCase()} · ${league.privacy}</small><h3>${league.name}</h3><p>${league.games.join(" + ")}</p></div></div><div class="created-share-link"><small>INVITE LINK</small><strong>${inviteUrl}</strong></div><div class="created-share-actions"><button class="ghost-button" data-action="copy-created-invite" data-league-id="${league.id}">Copy link</button><button class="ghost-button" data-action="sms-created-invite" data-league-id="${league.id}">Share via SMS</button></div><button class="primary-button full" data-action="open-created-league" data-league-id="${league.id}">Open league${icon("arrow")}</button></section>`);
+}
+
 function render({ preserveScroll = false } = {}) {
   const route = currentRoute();
   const weeklyMatch = route.match(/^\/(afl-round|nfl-pick6)(?:\/(review|submitted))?$/);
@@ -1148,9 +1156,31 @@ document.addEventListener("click", (event) => {
     saveState(); closeModal(); render({ preserveScroll: true });
   }
   if (action === "close-and-discover") { closeModal(); document.querySelector("#discover-leagues")?.scrollIntoView({ behavior: "smooth" }); }
-  if (action === "league-section") document.querySelector(`#${target.dataset.section}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (action === "league-section") {
+    leagueHubMode = target.dataset.mode || "my";
+    document.querySelectorAll(".league-mode-nav button").forEach((button) => {
+      const active = button.dataset.mode === leagueHubMode;
+      button.classList.toggle("active", active);
+      if (active) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
+    });
+    document.querySelector(`#${target.dataset.section}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
   if (action === "league-detail-tab") { leagueDetailTab = target.dataset.tab || "overview"; render(); }
-  if (action === "copy-invite") { navigator.clipboard?.writeText("https://worldplay.com/join/spring-carnival"); toast("League invite link copied"); }
+  if (action === "copy-invite" || action === "copy-created-invite") {
+    const leagueId = target.dataset.leagueId || currentRoute().match(/^\/leagues\/(?:racing|afl|nrl|nfl)\/([a-z0-9-]+)$/)?.[1] || "spring-carnival";
+    navigator.clipboard?.writeText(`https://worldplay.com/join/${leagueId}`);
+    toast("League invite link copied");
+  }
+  if (action === "sms-created-invite") {
+    const league = leagueById(target.dataset.leagueId);
+    const inviteUrl = `https://worldplay.com/join/${target.dataset.leagueId}`;
+    window.location.href = `sms:?&body=${encodeURIComponent(`Join ${league?.name || "my league"} on WorldPlay: ${inviteUrl}`)}`;
+  }
+  if (action === "open-created-league") {
+    const league = leagueById(target.dataset.leagueId);
+    if (!league) return;
+    closeModal(); leagueDetailTab = "overview"; go(`/leagues/${league.sport}/${league.id}`);
+  }
   if (action === "accept-invite") {
     if (!state.acceptedLeagueInvites.includes("office-footy")) state.acceptedLeagueInvites.push("office-footy");
     if (!state.customLeagues.some((league) => league.id === "office-footy")) state.customLeagues.push({ id: "office-footy", sport: "nrl", initials: "OT", name: "Office Footy Tips", privacy: "PRIVATE", members: 58, rank: 12, movement: "+1", leader: "@big_cat_dan", score: "1,402", deadline: "NRL Round 24 · Fri 7:50PM", tone: "teal", games: ["Weekly Tips"] });
@@ -1158,7 +1188,7 @@ document.addEventListener("click", (event) => {
   }
   if (action === "create-league-next") {
     if (leagueCreateStep === 1) {
-      const name = document.querySelector("#new-league-name")?.value.trim().replace(/[<>]/g, "").slice(0,32);
+      const name = document.querySelector("#new-league-name")?.value.trim().replace(/["'<>]/g, "").slice(0,32);
       if (!name) { toast("Give your league a name to continue"); document.querySelector("#new-league-name")?.focus(); return; }
       leagueDraft.name = name;
       leagueDraft.sport = document.querySelector("#new-league-sport")?.value || "racing";
@@ -1175,7 +1205,7 @@ document.addEventListener("click", (event) => {
     const initials = leagueDraft.name.split(/\s+/).map((word) => word[0]).join("").slice(0,2).toUpperCase();
     const league = { id, sport: leagueDraft.sport, initials, name: leagueDraft.name, privacy: leagueDraft.privacy.toUpperCase(), members: 1, rank: 1, movement: "—", leader: "YOU", score: "0", deadline: "First game · Coming up", tone: leagueDraft.sport === "racing" ? "lime" : leagueDraft.sport === "nrl" ? "teal" : leagueDraft.sport === "nfl" ? "green" : "red", games: [...leagueDraft.games] };
     state.customLeagues = [...state.customLeagues.filter((item) => item.id !== id), league];
-    saveState(); closeModal(); leagueDetailTab = "overview"; go(`/leagues/${league.sport}/${league.id}`); toast(`${league.name} created`);
+    saveState(); leagueDetailTab = "overview"; showCreatedLeague(league); toast(`${league.name} created`);
   }
   if (action === "sport-filter") {
     const sport = target.dataset.sport || "all";
