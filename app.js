@@ -273,6 +273,7 @@ function dashboard() {
             <div class="active-games-grid">
               ${visibleGames.length ? visibleGames.map((game) => game.html).join("") : emptySportState()}
             </div>
+            ${visibleGames.length > 1 ? `<p class="mobile-swipe-hint">Swipe to view more games →</p>` : ""}
           </section>
 
           <section class="dashboard-module upcoming-module" id="upcoming" aria-labelledby="upcoming-heading">
@@ -599,10 +600,6 @@ function survivorScreen() {
     ${header()}
     <main id="app-main">
       ${gameHero(survivorGame, "survivor")}
-      <section class="page-section survivor-progress-section">
-        <div class="section-heading"><div><p class="eyebrow red">YOUR SURVIVOR RUN</p><h2>TEN MEETINGS. ONE LIFE.</h2></div><span class="status-badge open">ROUND 1 OPEN</span></div>
-        <div class="survivor-track">${meetings.map((meeting,index)=>`<article class="survivor-round ${index===0?"current":"locked"}"><span>${index+1}</span><div><small>${meeting.date}</small><strong>${meeting.name}</strong><em>${index===0?(picked?"PICK SAVED":"CHOOSE A WINNER"):"LOCKED"}</em></div></article>`).join("")}</div>
-      </section>
       <section class="game-workspace survivor-workspace">
         <div class="workspace-heading"><div><p class="eyebrow red">ROUND 1 · ${survivorGame.race}</p><h2>CHOOSE ONE WINNER</h2><p>If your horse wins, you survive to the next meeting. Every other result means elimination.</p></div><div class="selection-meter"><strong>${picked ? "1" : "0"}</strong><span>/ 1 SELECTED</span></div></div>
         ${state.survivorEditing ? `<div class="edit-notice">${icon("clock")}<div><strong>EDITING SUBMITTED PICK</strong><span>Select a replacement, then resubmit before ${survivorGame.closes}.</span></div><button class="text-button" data-action="cancel-survivor-edit">Cancel edits</button></div>` : ""}
@@ -619,6 +616,10 @@ function survivorScreen() {
             ${picked ? `${silk(picked)}<h2>${picked.name}</h2><p>${picked.note}</p><dl><div><dt>JOCKEY</dt><dd>${picked.jockey}</dd></div><div><dt>TRAINER</dt><dd>${picked.trainer}</dd></div><div><dt>BARRIER</dt><dd>${picked.barrier}</dd></div><div><dt>FORM</dt><dd>${picked.form}</dd></div></dl><button class="text-button" data-action="clear-survivor" ${!gameOpen ? "disabled" : ""}>Remove selection</button>` : `<div class="empty-pick">${icon("horse")}<h2>No horse selected</h2><p>Choose one runner from the field to continue.</p></div>`}
           </aside>
         </div>
+      </section>
+      <section class="page-section survivor-progress-section">
+        <div class="section-heading"><div><p class="eyebrow red">YOUR SURVIVOR RUN</p><h2>TEN MEETINGS. ONE LIFE.</h2></div><span class="status-badge open">ROUND 1 OPEN</span></div>
+        <div class="survivor-track">${meetings.map((meeting,index)=>`<article class="survivor-round ${index===0?"current":"locked"}"><span>${index+1}</span><div><small>${meeting.date}</small><strong>${meeting.name}</strong><em>${index===0?(picked?"PICK SAVED":"CHOOSE A WINNER"):"LOCKED"}</em></div></article>`).join("")}</div>
       </section>
       <div class="sticky-action"><div><small>${state.survivorEditing ? "UNSUBMITTED CHANGES" : "SURVIVOR ROUND 1"}</small><strong>${!gameOpen ? "Selections closed" : picked ? `${picked.name} selected` : "Choose one winner"}</strong></div><button class="primary-button" data-route="/survivor/review" ${!picked || !gameOpen ? "disabled" : ""}>${state.survivorEditing ? "Review changes" : "Review pick"}${icon("arrow")}</button></div>
     </main>
