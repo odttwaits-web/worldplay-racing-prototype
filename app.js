@@ -184,14 +184,12 @@ function dashboard() {
   const top10Progress = Math.min(state.top10.length, 10);
   const survivorSelection = runnerById(state.survivorSubmittedPick || state.survivorPick);
   const playerGames = [
-    { sport: "racing", html: dashboardGameCard("racing", "PICK THE TOP 10", state.top10Submitted ? "ENTRY SUBMITTED" : `${top10Progress}/10 SELECTED`, "Melbourne Cup · $100K", top10Progress * 10, top10Route, state.top10Submitted ? "View entry" : "Make picks") },
-    { sport: "racing", html: dashboardGameCard("survivor", "SPRING SURVIVOR", state.survivorSubmitted ? "PICK SUBMITTED" : survivorSelection ? "PICK SAVED" : "ROUND 1 OPEN", survivorSelection ? survivorSelection.name : "Makybe Diva Stakes Day", survivorSelection ? 100 : 0, survivorRoute, state.survivorSubmitted ? "View pick" : "Choose horse") },
-    { sport: "afl", html: dashboardGameCard("afl", "AFL ROUND CARD", aflEntry.submitted ? "ENTRY SUBMITTED" : `${aflProgress}/9 TIPPED`, "Round 24 · $10K weekly", Math.round(aflProgress / 9 * 100), weeklyRoute(aflGame), aflEntry.submitted ? "View entry" : "Make tips") },
-    { sport: "afl", html: dashboardGameCard("afl", "AFL FINALS", "ROUND OPEN", "Qualifying finals · $250K", 62, null, "View bracket") },
-    { sport: "nrl", html: dashboardGameCard("nrl", "NRL FINALS", "UPCOMING", "Round 1 opens in 12 days", 0, null, "View game") },
-    { sport: "nfl", html: dashboardGameCard("nfl", "NFL WEEKLY PICK 6", nflEntry.submitted ? "ENTRY SUBMITTED" : `${nflProgress}/6 PICKED`, "Week 1 · $25K weekly", Math.round(nflProgress / 6 * 100), weeklyRoute(nflGame), nflEntry.submitted ? "View entry" : "Make picks") }
+    { sport: "racing", html: dashboardGameCard("racing", "PICK THE TOP 10", state.top10Submitted ? "ENTRY SUBMITTED" : `${top10Progress}/10 SELECTED`, "Melbourne Cup · $100K", "4 NOV · 2:55PM", top10Progress * 10, top10Route, state.top10Submitted ? "View entry" : "Make picks") },
+    { sport: "racing", html: dashboardGameCard("survivor", "SPRING SURVIVOR", state.survivorSubmitted ? "PICK SUBMITTED" : survivorSelection ? "PICK SAVED" : "ROUND 1 OPEN", survivorSelection ? survivorSelection.name : "Makybe Diva Stakes Day", "6 SEP · 3:55PM", survivorSelection ? 100 : 0, survivorRoute, state.survivorSubmitted ? "View pick" : "Choose horse") },
+    { sport: "afl", html: dashboardGameCard("afl", "AFL ROUND CARD", aflEntry.submitted ? "ENTRY SUBMITTED" : `${aflProgress}/9 TIPPED`, "Round 24 · $10K weekly", "21 AUG · 7:10PM", Math.round(aflProgress / 9 * 100), weeklyRoute(aflGame), aflEntry.submitted ? "View entry" : "Make tips") },
+    { sport: "nfl", html: dashboardGameCard("nfl", "NFL WEEKLY PICK 6", nflEntry.submitted ? "ENTRY SUBMITTED" : `${nflProgress}/6 PICKED`, "Week 1 · $25K weekly", "11 SEP · 10:15AM", Math.round(nflProgress / 6 * 100), weeklyRoute(nflGame), nflEntry.submitted ? "View entry" : "Make picks") }
   ];
-  const dashboardFilter = dashboardSport === "more" ? "community" : dashboardSport;
+  const dashboardFilter = dashboardSport;
   const visibleGames = dashboardSport === "all" ? playerGames : playerGames.filter((game) => game.sport === dashboardFilter);
   const schedule = [
     { sport: "afl", args: ["21", "AUG", "AFL · ROUND 24", "Round Card", "Tips close 7:10PM", "action", "/afl-round"] },
@@ -218,7 +216,7 @@ function dashboard() {
     { sport: "community", args: ["community", "LEAGUE STORIES", "How Office Footy Tips keeps the rivalry alive", "4 min read"] }
   ];
   const visibleNews = dashboardSport === "all" ? [news[0], news[2], news[8]] : news.filter((item) => item.sport === dashboardFilter);
-  const sportNames = { all: "ALL", racing: "RACING", afl: "AFL", nrl: "NRL", nfl: "NFL", more: "MORE" };
+  const sportNames = { all: "ALL", racing: "RACING", afl: "AFL", nrl: "NRL", nfl: "NFL", community: "COMMUNITY" };
   const activeSportName = sportNames[dashboardSport] || "ALL";
   const scheduleRoutes = { racing: "/racing", afl: "/afl-round", nfl: "/nfl-pick6" };
   const scheduleAction = scheduleRoutes[dashboardSport] ? `data-route="${scheduleRoutes[dashboardSport]}"` : 'data-action="show-coming-soon"';
@@ -242,7 +240,7 @@ function dashboard() {
     label: "NRL FINALS", count: "SOON", title: "ROUND 1 OPENS IN 12 DAYS", copy: "The next NRL competition is being prepared for launch.", progress: 0,
     closes: "OPENING SOON", route: null, cta: "Preview NRL"
   };
-  if (dashboardSport === "more") nextAction = {
+  if (dashboardSport === "community") nextAction = {
     label: "YOUR LEAGUES", count: "3", title: "PUNT ROAD LEGENDS IS HEATING UP", copy: "See the latest movement across your private and community leagues.", progress: 72,
     closes: "NEXT DEADLINE · FRIDAY", route: null, cta: "View leagues"
   };
@@ -256,7 +254,7 @@ function dashboard() {
             <p class="eyebrow red">YOUR WORLDPLAY</p>
             <h1>GOOD AFTERNOON,<br><span>OSCAR.</span></h1>
             <p>Everything you are playing, following and competing in—one place.</p>
-            <div class="home-quick-stats"><span><strong>6</strong> ACTIVE GAMES</span><span><strong>#24</strong> BEST RANK</span><span><strong>3</strong> LEAGUES</span></div>
+            <div class="home-quick-stats"><span><strong>4</strong> ACTIVE GAMES</span><span><strong>#24</strong> BEST GAME RANK</span><span><strong>3</strong> LEAGUES</span></div>
           </div>
           <article class="next-action-card">
             <div class="next-action-top"><span class="live-dot"></span><small>NEXT ACTION · ${nextAction.label}</small><span>${nextAction.count}</span></div>
@@ -290,12 +288,17 @@ function dashboard() {
               ${visibleNews.map((item) => newsCard(...item.args)).join("")}
             </div>
           </section>
+
+          <section class="dashboard-module social-strip-card" aria-labelledby="social-heading">
+            <div class="module-heading"><div><p class="eyebrow red">SOCIAL FEED</p><h2 id="social-heading">FROM WORLDPLAY</h2></div><span class="x-mark">𝕏</span></div>
+            <div class="social-strip-post"><div><strong>@WorldPlay</strong><small>· 18m</small></div><p>The Spring Carnival is coming. Two new games, ten meetings and plenty of bragging rights.</p><span>12 replies · 34 reposts · 186 likes</span><button class="outline-button small" data-action="show-coming-soon">View on X${icon("arrow")}</button></div>
+          </section>
         </div>
 
         <aside class="dashboard-sidebar" aria-label="Leagues and rankings">
           <section class="sidebar-card rank-summary-card">
-            <div class="sidebar-heading"><p class="eyebrow red">YOUR RANK</p><span>GLOBAL</span></div>
-            <div class="rank-lockup"><strong>#24</strong><span><b>↑ 7</b> THIS WEEK<br>OF 96,441 PLAYERS</span></div>
+            <div class="sidebar-heading"><p class="eyebrow red">TOP 10 RANK</p><span>MELBOURNE CUP</span></div>
+            <div class="rank-lockup"><strong>#24</strong><span><b>↑ 7</b> THIS WEEK<br>OF 96,441 IN THIS GAME</span></div>
             <div class="rank-bar"><span></span></div>
             <button class="outline-button full small" data-action="show-coming-soon">View leaderboard${icon("arrow")}</button>
           </section>
@@ -319,12 +322,6 @@ function dashboard() {
             </ul>
           </section>
 
-          <section class="sidebar-card x-feed-card">
-            <div class="sidebar-heading"><div><p class="eyebrow red">SOCIAL FEED</p><h2>FROM WORLDPLAY</h2></div><span class="x-mark">𝕏</span></div>
-            <article class="x-post"><div><strong>@WorldPlay</strong><small>· 18m</small></div><p>The Spring Carnival is coming. Two new games, ten meetings and plenty of bragging rights.</p><span>12 replies · 34 reposts · 186 likes</span></article>
-            <article class="x-post"><div><strong>@WorldPlay</strong><small>· 3h</small></div><p>Finals pressure is building. Have you locked in your latest AFL calls?</p><span>8 replies · 21 reposts · 104 likes</span></article>
-            <button class="outline-button full small" data-action="show-coming-soon">View more on X${icon("arrow")}</button>
-          </section>
         </aside>
       </section>
 
@@ -352,9 +349,19 @@ function dashboard() {
 
 function sportsRail() {
   const sports = [
-    ["all", "ALL GAMES"], ["racing", "RACING"], ["afl", "AFL"], ["nrl", "NRL"], ["nfl", "NFL"], ["more", "MORE"]
+    ["all", "ALL GAMES"], ["racing", "RACING"], ["afl", "AFL"], ["nrl", "NRL"], ["nfl", "NFL"]
   ];
-  return `<nav class="sports-rail" aria-label="Games by sport"><div class="sports-rail-inner">${sports.map(([id, label]) => `<button class="${dashboardSport === id ? "active" : ""}" data-action="sport-filter" data-sport="${id}" ${dashboardSport === id ? 'aria-current="page"' : ""}>${label}</button>`).join("")}</div></nav>`;
+  return `<nav class="sports-rail" aria-label="Games by sport"><div class="sports-rail-inner">
+    ${sports.map(([id, label]) => `<button class="${dashboardSport === id ? "active" : ""}" data-action="sport-filter" data-sport="${id}" ${dashboardSport === id ? 'aria-current="page"' : ""}>${label}</button>`).join("")}
+    <details class="sports-more ${dashboardSport === "community" ? "active" : ""}">
+      <summary ${dashboardSport === "community" ? 'aria-current="page"' : ""}>MORE</summary>
+      <div class="sports-more-menu">
+        <button data-action="sport-filter" data-sport="community">COMMUNITY &amp; LEAGUES</button>
+        <button data-action="show-coming-soon">CRICKET <span>COMING SOON</span></button>
+        <button data-action="show-coming-soon">BASKETBALL <span>COMING SOON</span></button>
+      </div>
+    </details>
+  </div></nav>`;
 }
 
 function emptySportState() {
@@ -365,11 +372,12 @@ function emptyScheduleState() {
   return `<div class="empty-schedule-state"><strong>YOU'RE ALL CLEAR</strong><span>No upcoming deadlines in this category.</span></div>`;
 }
 
-function dashboardGameCard(kind, title, status, detail, progress, route, cta) {
+function dashboardGameCard(kind, title, status, detail, deadline, progress, route, cta) {
   const action = route ? `data-route="${route}"` : 'data-action="show-coming-soon"';
   return `<article class="dashboard-game-card ${kind}">
     <div class="dashboard-game-top"><span class="game-sport">${kind === "racing" || kind === "survivor" ? "RACING" : kind.toUpperCase()}</span><span class="game-state">${status}</span></div>
-    <h3>${title}</h3><p>${detail}</p>
+    <h3>${title}</h3>
+    <div class="dashboard-game-meta"><p>${detail}</p><span><small>PICKS CLOSE</small><strong>${deadline}</strong></span></div>
     <div class="game-progress"><span style="width:${progress}%"></span></div>
     <button class="text-button" ${action}>${cta} →</button>
   </article>`;
@@ -653,9 +661,17 @@ function weeklyFixtureCard(game, fixture, entry) {
 
 function weeklySummary(game, entry) {
   const count = Object.keys(entry.picks).length;
+  const usedConfidence = new Set(Object.values(entry.confidence).map(Number));
+  const remainingConfidence = game.scoring === "confidence"
+    ? game.fixtures.map((_, index) => index + 1).filter((value) => !usedConfidence.has(value))
+    : [];
+  const requiredCall = game.scoring === "confidence"
+    ? `<div class="weekly-required-call ${remainingConfidence.length ? "" : "complete"}"><span>CONFIDENCE POINTS LEFT</span><strong>${remainingConfidence.join(" · ") || "COMPLETE"}</strong></div>`
+    : `<div class="weekly-required-call ${entry.margin ? "complete" : ""}"><span>FEATURED MATCH MARGIN</span><strong>${entry.margin ? `${entry.margin} PTS` : "REQUIRED"}</strong></div>`;
   return `<aside class="weekly-summary-card">
     <div class="weekly-summary-head"><p class="eyebrow red">YOUR ENTRY</p><strong>${count}<small>/${game.fixtures.length}</small></strong></div>
     <div class="game-progress"><span style="width:${Math.round(count / game.fixtures.length * 100)}%"></span></div>
+    ${requiredCall}
     <div class="weekly-summary-list">${game.fixtures.map((fixture) => {
       const code = entry.picks[fixture.id];
       const team = [fixture.home, fixture.away].find((candidate) => candidate.code === code);
@@ -678,7 +694,7 @@ function weeklyGameScreen(game) {
     </section>
     <section class="weekly-workspace">
       ${entry.editing ? `<div class="edit-notice">${icon("clock")}<div><strong>EDITING SUBMITTED ENTRY</strong><span>Update your picks and resubmit before ${game.closes}.</span></div><button class="text-button" data-action="cancel-weekly-edit" data-game="${game.id}">Cancel edits</button></div>` : ""}
-      <div class="weekly-workspace-heading"><div><p class="eyebrow red">${game.kind === "round" ? "THIS ROUND" : "THIS WEEK"}</p><h2>MAKE YOUR PICKS</h2><p>${game.scoring === "confidence" ? "Choose each winner, then use every confidence value once." : "Tip every match and enter the winning margin for the featured game."}</p></div><span>${Object.keys(entry.picks).length}/${game.fixtures.length} COMPLETE</span></div>
+      <div class="weekly-workspace-heading"><div><p class="eyebrow red">${game.kind === "round" ? "THIS ROUND" : "THIS WEEK"}</p><h2>MAKE YOUR PICKS</h2><p>${game.scoring === "confidence" ? "First pick all six winners. Then assign each confidence value from 1 to 6 once." : "Tip every match and enter the winning margin for the featured game."}</p></div><span>${Object.keys(entry.picks).length}/${game.fixtures.length} PICKS MADE</span></div>
       <div class="weekly-layout"><div class="weekly-fixture-list">${game.fixtures.map((fixture) => weeklyFixtureCard(game, fixture, entry)).join("")}</div>${weeklySummary(game, entry)}</div>
     </section>
     <div class="sticky-action"><div><small>${entry.editing ? "UNSUBMITTED CHANGES" : "ENTRY PROGRESS"}</small><strong>${!open ? "Selections closed" : complete ? "Ready to review" : "Complete every required pick"}</strong></div><button class="primary-button" data-route="/${game.id}/review" ${!complete || !open ? "disabled" : ""}>Review entry${icon("arrow")}</button></div>
@@ -725,6 +741,7 @@ function rulesDialog() {
 function render({ preserveScroll = false } = {}) {
   const route = currentRoute();
   const weeklyMatch = route.match(/^\/(afl-round|nfl-pick6)(?:\/(review|submitted))?$/);
+  const dashboardMatch = route.match(/^\/dashboard(?:\/(racing|afl|nrl|nfl|community))?$/);
   let html;
   if (weeklyMatch) {
     const game = weeklyGameById(weeklyMatch[1]);
@@ -734,7 +751,10 @@ function render({ preserveScroll = false } = {}) {
     else if (phase === "submitted" && entry.submitted) html = weeklySuccessScreen(game);
     else html = entry.submitted && !entry.editing ? weeklySuccessScreen(game) : weeklyGameScreen(game);
   }
-  else if (route === "/dashboard") html = dashboard();
+  else if (dashboardMatch) {
+    dashboardSport = dashboardMatch[1] || "all";
+    html = dashboard();
+  }
   else if (route === "/racing") html = racingHub();
   else if (route === "/top10/review") html = top10Review();
   else if (route === "/top10/submitted") html = successScreen("top10");
@@ -819,8 +839,8 @@ document.addEventListener("click", (event) => {
   if (action === "show-rules") { toggleMenu(false); showRules(); }
   if (action === "show-coming-soon") toast("This competition is shown for context — Racing, AFL and NFL prototypes are playable.");
   if (action === "sport-filter") {
-    dashboardSport = target.dataset.sport || "all";
-    render({ preserveScroll: true });
+    const sport = target.dataset.sport || "all";
+    go(sport === "all" ? "/dashboard" : `/dashboard/${sport}`);
   }
   if (action === "scroll-arena") document.querySelector("#arena")?.scrollIntoView({ behavior: "smooth" });
   if (action === "close-modal") closeModal();
