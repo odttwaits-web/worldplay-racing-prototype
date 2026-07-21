@@ -144,7 +144,7 @@ function gameMiniCard(game) {
     ? state.top10Submitted && !state.top10Editing ? "/top10/submitted" : "/top10"
     : state.survivorSubmitted && !state.survivorEditing ? "/survivor/submitted" : "/survivor";
   return `
-    <article class="game-mini-card ${isTop10 ? "top10-card" : "survivor-card"}">
+    <article class="game-mini-card ${isTop10 ? "top10-card" : "survivor-card"}" role="link" tabindex="0" data-route="${route}" aria-label="Open ${game.title}">
       <div class="game-card-top">
         <span class="status-badge ${statusClass}">${status}</span>
         <span class="game-icon">${icon(isTop10 ? "list" : "horse")}</span>
@@ -153,7 +153,7 @@ function gameMiniCard(game) {
       <h3>${isTop10 ? "PICK THE<br><em>TOP 10</em>" : "SURVIVOR<br><em>LAST ONE STANDING</em>"}</h3>
       <p>${game.subtitle}</p>
       <div class="mini-meta"><span>PRIZE <strong>${game.prize}</strong></span><span>${game.closes}</span></div>
-      <button class="outline-button full" data-route="${route}">${isEditing ? "Continue editing" : statusClass === "success" ? "View entry" : "Play now"}${icon("arrow")}</button>
+      <span class="outline-button full">${isEditing ? "Continue editing" : statusClass === "success" ? "View entry" : "Play now"}${icon("arrow")}</span>
     </article>
   `;
 }
@@ -374,13 +374,13 @@ function emptyScheduleState() {
 }
 
 function dashboardGameCard(kind, title, status, detail, deadline, progress, route, cta) {
-  const action = route ? `data-route="${route}"` : 'data-action="show-coming-soon"';
-  return `<article class="dashboard-game-card ${kind}">
+  const cardAction = route ? `role="link" tabindex="0" data-route="${route}" aria-label="${cta}: ${title}"` : 'data-action="show-coming-soon"';
+  return `<article class="dashboard-game-card ${kind}" ${cardAction}>
     <div class="dashboard-game-top"><span class="game-sport">${kind === "racing" || kind === "survivor" ? "RACING" : kind.toUpperCase()}</span><span class="game-state">${status}</span></div>
     <h3>${title}</h3>
     <div class="dashboard-game-meta"><p>${detail}</p><span><small>PICKS CLOSE</small><strong>${deadline}</strong></span></div>
     <div class="game-progress"><span style="width:${progress}%"></span></div>
-    <button class="text-button" ${action}>${cta} →</button>
+    <span class="text-button">${cta} →</span>
   </article>`;
 }
 
@@ -398,9 +398,9 @@ function leagueRow(initials, name, members, rank, signal) {
 }
 
 function sportCard(kind, title, subtitle, prize, route) {
-  return `<article class="sport-card ${kind} ${route ? "active" : ""}">
+  return `<article class="sport-card ${kind} ${route ? "active" : ""}" ${route ? `role="link" tabindex="0" data-route="${route}" aria-label="Play ${title}"` : ""}>
     <div class="sport-card-art"><span>${kind === "community" ? "WP" : title}</span></div>
-    <div class="sport-card-body"><span class="sport-tag">${route ? "PLAYABLE PROTOTYPE" : kind === "community" ? "FREE TO JOIN" : "FREE TO PLAY"}</span><h3>${title}</h3><p>${subtitle}</p><strong>${prize}</strong><button class="sport-card-button" ${route ? `data-route="${route}"` : 'data-action="show-coming-soon"'}>${route ? `PLAY ${title}` : "EXPLORE MORE"}${icon("arrow")}</button></div>
+    <div class="sport-card-body"><span class="sport-tag">${route ? "PLAYABLE PROTOTYPE" : kind === "community" ? "FREE TO JOIN" : "FREE TO PLAY"}</span><h3>${title}</h3><p>${subtitle}</p><strong>${prize}</strong>${route ? `<span class="sport-card-button">PLAY ${title}${icon("arrow")}</span>` : `<button class="sport-card-button" data-action="show-coming-soon">EXPLORE MORE${icon("arrow")}</button>`}</div>
   </article>`;
 }
 
@@ -825,6 +825,14 @@ function moveTop10(index, delta) {
   saveState();
   render({ preserveScroll: true });
 }
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") return;
+  const card = event.target.closest('[role="link"][data-route]');
+  if (!card || event.target !== card) return;
+  event.preventDefault();
+  go(card.dataset.route);
+});
 
 document.addEventListener("click", (event) => {
   const routeTarget = event.target.closest("[data-route]");

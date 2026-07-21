@@ -46,3 +46,10 @@ test("weekly entries expose every required scoring input before review", async (
   assert.match(client, /CONFIDENCE POINTS LEFT/);
   assert.match(client, /First pick all six winners/);
 });
+
+test("playable game cards are full keyboard-accessible navigation targets", async () => {
+  const client = await readFile(join(root, "dist/client/app.js"), "utf8");
+  assert.match(client, /role="link" tabindex="0" data-route/);
+  assert.match(client, /event\.key !== "Enter"/);
+  assert.match(client, /event\.target\.closest\('\[role="link"\]\[data-route\]'\)/);
+});
