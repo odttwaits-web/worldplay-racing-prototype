@@ -85,3 +85,13 @@ test("the league hub supports every sport and core social league task", async ()
   assert.match(client, /league-mobile-action/);
   assert.match(client, /data-mode="discover"/);
 });
+
+test("league journeys use legible actions and mobile-first hierarchy", async () => {
+  const styles = await readFile(join(root, "dist/client/styles.css"), "utf8");
+  assert.match(styles, /\.league-hub-page \.primary-button[^}]*min-height: 50px/);
+  assert.match(styles, /\.league-hub-page \.small[^}]*min-height: 44px/);
+  assert.match(styles, /\.league-detail-nav button[^}]*font: 700 10\.5px/);
+  assert.match(styles, /\.league-next > span:last-child[^}]*min-height: 44px/);
+  assert.match(styles, /@media \(max-width: 760px\)[\s\S]*\.league-summary-strip \{ display: none; \}/);
+  assert.match(styles, /@media \(max-width: 760px\)[\s\S]*\.league-detail-actions \{ display: none; \}/);
+});

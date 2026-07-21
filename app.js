@@ -549,11 +549,11 @@ function leagueHub(activeSport = "all") {
         </div>
       </section>
 
+      <section class="page-section league-mode-section">${leagueModeNav()}</section>
+
       <section class="page-section league-summary-strip" aria-label="League summary">
         <div><strong>${ownedLeagues.length}</strong><span>ACTIVE LEAGUES</span></div><div><strong>90</strong><span>LEAGUE RIVALS</span></div><div><strong>#3</strong><span>BEST RANK</span></div><div><strong>2</strong><span>NEW UPDATES</span></div>
       </section>
-
-      <section class="page-section league-mode-section">${leagueModeNav()}</section>
 
       <section id="my-leagues" class="page-section league-content-grid">
         <div class="league-collection">
