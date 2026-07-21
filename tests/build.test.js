@@ -53,3 +53,13 @@ test("playable game cards are full keyboard-accessible navigation targets", asyn
   assert.match(client, /event\.key !== "Enter"/);
   assert.match(client, /event\.target\.closest\('\[role="link"\]\[data-route\]'\)/);
 });
+
+test("playable screens expose a persistent cross-game switcher", async () => {
+  const client = await readFile(join(root, "dist/client/app.js"), "utf8");
+  for (const label of ["ALL GAMES", "RACING HUB", "PICK TOP 10", "SURVIVOR", "AFL ROUND", "NFL PICK 6"]) {
+    assert.match(client, new RegExp(label));
+  }
+  assert.match(client, /gameSwitcher\("top10"\)/);
+  assert.match(client, /gameSwitcher\("survivor"\)/);
+  assert.match(client, /gameSwitcher\(game\.id\)/);
+});

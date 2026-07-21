@@ -121,6 +121,16 @@ h1, h2, h3 { margin: 0; font-family: var(--condensed); font-weight: 900; text-tr
 .sports-rail .sports-more-menu button::after { display: none; }
 .sports-more-menu button span { color: #666; font-size: 6px; letter-spacing: .08em; }
 
+.game-switcher { min-height: 44px; position: sticky; top: 72px; z-index: 86; border-bottom: 1px solid rgba(255,255,255,.11); background: rgba(13,13,14,.96); backdrop-filter: blur(18px); }
+.game-switcher-inner { width: min(1180px,calc(100% - 32px)); min-height: 43px; margin: auto; display: flex; align-items: stretch; justify-content: center; overflow-x: auto; scrollbar-width: none; }
+.game-switcher-inner::-webkit-scrollbar { display: none; }
+.game-switcher button { flex: 0 0 auto; min-width: 126px; min-height: 43px; padding: 0 18px; position: relative; border: 0; background: transparent; color: #858489; cursor: pointer; font: 700 9px/1 var(--button-font); letter-spacing: .06em; transition: color .18s,background .18s; }
+.game-switcher button::after { content: ""; position: absolute; left: 17px; right: 17px; bottom: 0; height: 2px; background: var(--red); transform: scaleX(0); transition: transform .18s; }
+.game-switcher button:hover { color: #fff; background: rgba(255,255,255,.025); }
+.game-switcher button.active { color: #fff; background: linear-gradient(180deg,transparent,rgba(255,255,255,.03)); }
+.game-switcher button.active::after { transform: scaleX(1); }
+.game-tab-short { display: none; }
+
 .home-command-hero { min-height: 296px; position: relative; isolation: isolate; display: grid; align-items: center; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,.09); background: #0b0b0c; }
 .home-command-hero::before { content: ""; position: absolute; z-index: -2; inset: 0; background: linear-gradient(90deg,#09090b 0%,rgba(9,9,11,.94) 41%,rgba(9,9,11,.42) 74%,rgba(9,9,11,.84)),linear-gradient(0deg,#09090b 0%,transparent 24%),url("./assets/worldplay-stadium.webp") center 46% / cover no-repeat; opacity: .94; }
 .home-command-hero::after { content: ""; position: absolute; z-index: -1; inset: -15% -5% -20% 40%; background: radial-gradient(ellipse at center,rgba(255,23,39,.18),transparent 65%); }
@@ -727,6 +737,12 @@ dd { margin: 0; font-size: 11px; font-weight: 800; text-align: right; }
   .sports-more summary::after { left: 7px; right: 7px; }
   .sports-more-menu { width: min(230px,calc(100vw - 20px)); right: 0; }
   .sports-rail .sports-more-menu button { padding: 0 11px; font-size: 8px; }
+  .game-switcher { top: 64px; }
+  .game-switcher-inner { width: 100%; justify-content: flex-start; }
+  .game-switcher button { min-width: 76px; padding: 0 12px; font-size: 8px; }
+  .game-switcher button::after { left: 10px; right: 10px; }
+  .game-tab-full { display: none; }
+  .game-tab-short { display: inline; }
   .home-command-hero { min-height: auto; }
   .home-command-inner { padding: 18px 0 20px; grid-template-columns: 1fr; gap: 15px; }
   .home-welcome { order: 2; }

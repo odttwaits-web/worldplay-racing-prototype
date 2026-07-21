@@ -408,9 +408,22 @@ function closingCard(title, closes, players, prize) {
   return `<article class="closing-card"><h3>${title}</h3><dl><div><dt>BRACKET CLOSES IN</dt><dd>${closes}</dd></div><div><dt>PLAYERS JOINED</dt><dd>${players}</dd></div><div><dt>PRIZES</dt><dd class="red-copy">${prize}</dd></div></dl><button class="outline-button full" data-action="show-coming-soon">View competition</button></article>`;
 }
 
+function gameSwitcher(activeGame) {
+  const games = [
+    ["dashboard", "ALL GAMES", "ALL", "/dashboard"],
+    ["racing", "RACING HUB", "RACING", "/racing"],
+    ["top10", "PICK TOP 10", "TOP 10", "/top10"],
+    ["survivor", "SURVIVOR", "SURVIVOR", "/survivor"],
+    ["afl-round", "AFL ROUND", "AFL", "/afl-round"],
+    ["nfl-pick6", "NFL PICK 6", "NFL", "/nfl-pick6"]
+  ];
+  return `<nav class="game-switcher" aria-label="Switch games"><div class="game-switcher-inner">${games.map(([id, label, shortLabel, route]) => `<button class="${activeGame === id ? "active" : ""}" data-route="${route}" ${activeGame === id ? 'aria-current="page"' : ""}><span class="game-tab-full">${label}</span><span class="game-tab-short">${shortLabel}</span></button>`).join("")}</div></nav>`;
+}
+
 function racingHub() {
   return `
     ${header()}
+    ${gameSwitcher("racing")}
     <main id="app-main">
       <section class="compact-hero">
         <button class="back-link" data-route="/dashboard">← Back to dashboard</button>
@@ -483,6 +496,7 @@ function top10Screen() {
   const gameOpen = entryIsOpen(topTenGame);
   return `
     ${header()}
+    ${gameSwitcher("top10")}
     <main id="app-main">
       ${gameHero(topTenGame, "top10")}
       <section class="game-workspace">
@@ -543,6 +557,7 @@ function top10Review() {
   const gameOpen = entryIsOpen(topTenGame);
   return `
     ${header()}
+    ${gameSwitcher("top10")}
     <main id="app-main" class="review-page">
       <section class="review-header"><button class="back-link" data-route="/top10">← Edit selections</button><p class="eyebrow red">PICK THE TOP 10</p><h1>${state.top10Editing ? "REVIEW YOUR CHANGES" : "REVIEW YOUR ENTRY"}</h1><p>Check the order carefully. You can revise a submitted entry until picks close.</p></section>
       <section class="review-grid">
@@ -573,6 +588,7 @@ function successScreen(game) {
   const canEdit = entryIsOpen(gameData);
   return `
     ${header()}
+    ${gameSwitcher(game)}
     <main id="app-main" class="success-page">
       <section class="success-card">
         <div class="success-icon">${icon("check")}</div>
@@ -598,6 +614,7 @@ function survivorScreen() {
   const gameOpen = entryIsOpen(survivorGame);
   return `
     ${header()}
+    ${gameSwitcher("survivor")}
     <main id="app-main">
       ${gameHero(survivorGame, "survivor")}
       <section class="game-workspace survivor-workspace">
@@ -632,6 +649,7 @@ function survivorReview() {
   const gameOpen = entryIsOpen(survivorGame);
   return `
     ${header()}
+    ${gameSwitcher("survivor")}
     <main id="app-main" class="review-page">
       <section class="review-header"><button class="back-link" data-route="/survivor">← Change selection</button><p class="eyebrow red">SURVIVOR · ROUND 1</p><h1>${state.survivorEditing ? "REVIEW YOUR CHANGE" : "LOCK IN YOUR PICK"}</h1><p>Your submitted pick can be revised until selections close.</p></section>
       <section class="survivor-review-card">
@@ -687,7 +705,7 @@ function weeklyGameScreen(game) {
   const entry = weeklyEntry(game.id);
   const complete = weeklyEntryIsComplete(game, entry);
   const open = entryIsOpen(game);
-  return `${header()}<main id="app-main" class="weekly-game-page ${game.sport.toLowerCase()}">
+  return `${header()}${gameSwitcher(game.id)}<main id="app-main" class="weekly-game-page ${game.sport.toLowerCase()}">
     <section class="weekly-game-hero">
       <div class="weekly-hero-inner"><button class="back-link" data-route="/dashboard">← Back to dashboard</button><p class="eyebrow red">${game.eyebrow}</p><h1>${game.title}</h1><p>${game.subtitle}</p>
         <div class="game-meta"><span><small>PRIZE</small><strong>${game.prize}</strong></span><span><small>PICKS CLOSE</small><strong>${game.closes}</strong></span><span><small>FORMAT</small><strong>${game.scoring === "confidence" ? "CONFIDENCE" : "WINNERS + MARGIN"}</strong></span></div>
@@ -705,7 +723,7 @@ function weeklyGameScreen(game) {
 function weeklyReviewScreen(game) {
   const entry = weeklyEntry(game.id);
   if (!weeklyEntryIsComplete(game, entry)) return weeklyGameScreen(game);
-  return `${header()}<main id="app-main" class="review-page weekly-review-page">
+  return `${header()}${gameSwitcher(game.id)}<main id="app-main" class="review-page weekly-review-page">
     <section class="review-header"><button class="back-link" data-route="/${game.id}">← Edit selections</button><p class="eyebrow red">${game.eyebrow}</p><h1>${entry.editing ? "REVIEW YOUR CHANGES" : "REVIEW YOUR ENTRY"}</h1><p>Every pick can be revised until ${game.closes}.</p></section>
     <section class="weekly-review-grid"><div class="weekly-review-list">${game.fixtures.map((fixture) => {
       const code = entry.picks[fixture.id];
@@ -718,7 +736,7 @@ function weeklyReviewScreen(game) {
 function weeklySuccessScreen(game) {
   const entry = weeklyEntry(game.id);
   const picks = entry.submittedPicks;
-  return `${header()}<main id="app-main" class="success-page weekly-success-page"><section class="success-card"><span class="success-icon">${icon("check")}</span><p class="eyebrow red">ENTRY SUBMITTED</p><h1>${game.title}<br>IS LOCKED IN.</h1><p>Your ${game.sport} entry has been saved. You can revise it until ${game.closes}.</p><div class="weekly-success-picks">${game.fixtures.map((fixture) => {
+  return `${header()}${gameSwitcher(game.id)}<main id="app-main" class="success-page weekly-success-page"><section class="success-card"><span class="success-icon">${icon("check")}</span><p class="eyebrow red">ENTRY SUBMITTED</p><h1>${game.title}<br>IS LOCKED IN.</h1><p>Your ${game.sport} entry has been saved. You can revise it until ${game.closes}.</p><div class="weekly-success-picks">${game.fixtures.map((fixture) => {
     const code = picks[fixture.id]; const team = [fixture.home, fixture.away].find((candidate) => candidate.code === code);
     return `<span><b>${team?.code}</b>${game.scoring === "confidence" ? `${entry.submittedConfidence[fixture.id]} PTS` : fixture.featured ? `${entry.submittedMargin} MARGIN` : "PICKED"}</span>`;
   }).join("")}</div><div class="success-actions"><button class="primary-button" data-action="edit-weekly" data-game="${game.id}">Edit selections${icon("arrow")}</button><button class="ghost-button" data-route="/dashboard">Return to dashboard</button></div></section></main>${footer()}`;
@@ -765,6 +783,9 @@ function render({ preserveScroll = false } = {}) {
   else if (route === "/survivor") html = state.survivorSubmitted && !state.survivorEditing ? successScreen("survivor") : survivorScreen();
   else html = dashboard();
   app.innerHTML = html;
+  const gameTabs = document.querySelector(".game-switcher-inner");
+  const activeGameTab = gameTabs?.querySelector(".active");
+  if (gameTabs && activeGameTab) gameTabs.scrollLeft = Math.max(0, activeGameTab.offsetLeft - (gameTabs.clientWidth - activeGameTab.clientWidth) / 2);
   if (!preserveScroll) window.scrollTo({ top: 0, behavior: "instant" });
 }
 
