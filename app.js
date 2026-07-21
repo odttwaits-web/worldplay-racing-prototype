@@ -273,7 +273,7 @@ function dashboard() {
             <div class="active-games-grid">
               ${visibleGames.length ? visibleGames.map((game) => game.html).join("") : emptySportState()}
             </div>
-            ${visibleGames.length > 1 ? `<p class="mobile-swipe-hint">Swipe to view more games →</p>` : ""}
+            ${visibleGames.length > 1 ? `<p class="mobile-swipe-hint">Swipe for more games →</p>` : ""}
           </section>
 
           <section class="dashboard-module upcoming-module" id="upcoming" aria-labelledby="upcoming-heading">
