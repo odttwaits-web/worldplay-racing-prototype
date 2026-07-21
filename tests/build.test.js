@@ -33,4 +33,6 @@ test("the stakeholder dashboard includes the personalised home modules", async (
   assert.doesNotMatch(client, /RACING EDITION/);
   assert.doesNotMatch(client, /sports-search/);
   assert.doesNotMatch(client, />BROWSE</);
+  assert.match(client, /AFL ROUND CARD/);
+  assert.match(client, /NFL WEEKLY PICK 6/);
 });

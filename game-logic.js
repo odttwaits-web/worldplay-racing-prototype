@@ -29,3 +29,45 @@ export function normalizePrototypeState(rawState, defaults, cupRunners, survivor
 
   return loaded;
 }
+
+export function emptyWeeklyEntry() {
+  return {
+    picks: {}, confidence: {}, margin: "", submitted: false,
+    submittedPicks: {}, submittedConfidence: {}, submittedMargin: "", editing: false
+  };
+}
+
+export function weeklyEntryIsComplete(game, entry) {
+  if (!game || !entry || game.fixtures.some((fixture) => !entry.picks?.[fixture.id])) return false;
+  if (game.featuredFixtureId) {
+    const margin = Number(entry.margin);
+    if (!Number.isInteger(margin) || margin < 1 || margin > 99) return false;
+  }
+  if (game.scoring === "confidence") {
+    const values = game.fixtures.map((fixture) => Number(entry.confidence?.[fixture.id]));
+    return values.every((value) => Number.isInteger(value) && value >= 1 && value <= game.fixtures.length)
+      && new Set(values).size === game.fixtures.length;
+  }
+  return true;
+}
+
+export function normalizeWeeklyEntries(rawEntries, games) {
+  const normalized = {};
+  for (const game of Object.values(games)) {
+    const raw = rawEntries?.[game.id] || {};
+    const entry = { ...emptyWeeklyEntry(), ...raw };
+    const validTeams = new Map(game.fixtures.map((fixture) => [fixture.id, new Set([fixture.home.code, fixture.away.code])]));
+    entry.picks = Object.fromEntries(Object.entries(entry.picks || {}).filter(([fixtureId, code]) => validTeams.get(fixtureId)?.has(code)));
+    entry.submittedPicks = Object.fromEntries(Object.entries(entry.submittedPicks || {}).filter(([fixtureId, code]) => validTeams.get(fixtureId)?.has(code)));
+    entry.confidence = Object.fromEntries(Object.entries(entry.confidence || {}).filter(([fixtureId, value]) => validTeams.has(fixtureId) && Number.isInteger(Number(value))));
+    entry.submittedConfidence = Object.fromEntries(Object.entries(entry.submittedConfidence || {}).filter(([fixtureId, value]) => validTeams.has(fixtureId) && Number.isInteger(Number(value))));
+    if (entry.submitted && !weeklyEntryIsComplete(game, {
+      picks: entry.submittedPicks,
+      confidence: entry.submittedConfidence,
+      margin: entry.submittedMargin
+    })) entry.submitted = false;
+    if (!entry.submitted) entry.editing = false;
+    normalized[game.id] = entry;
+  }
+  return normalized;
+}

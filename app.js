@@ -5,9 +5,18 @@ import {
   runnerById,
   survivorOpeningRunners,
   survivorGame,
-  topTenGame
+  topTenGame,
+  weeklyGameById,
+  weeklyGames
 } from "./data.js";
-import { entryIsOpen, moveRankedSelection, normalizePrototypeState } from "./game-logic.js";
+import {
+  emptyWeeklyEntry,
+  entryIsOpen,
+  moveRankedSelection,
+  normalizePrototypeState,
+  normalizeWeeklyEntries,
+  weeklyEntryIsComplete
+} from "./game-logic.js";
 
 const STORAGE_KEY = "worldplay-racing-prototype-v1";
 const app = document.querySelector("#app");
@@ -21,7 +30,8 @@ const defaultState = {
   survivorPick: null,
   survivorSubmitted: false,
   survivorSubmittedPick: null,
-  survivorEditing: false
+  survivorEditing: false,
+  weeklyEntries: Object.fromEntries(Object.keys(weeklyGames).map((id) => [id, emptyWeeklyEntry()]))
 };
 
 let state = loadState();
@@ -38,6 +48,7 @@ function loadState() {
     );
     if (loaded.top10Submitted && !loaded.top10SubmittedPicks.length) loaded.top10SubmittedPicks = [...loaded.top10];
     if (loaded.survivorSubmitted && !loaded.survivorSubmittedPick) loaded.survivorSubmittedPick = loaded.survivorPick;
+    loaded.weeklyEntries = normalizeWeeklyEntries(loaded.weeklyEntries, weeklyGames);
     return loaded;
   } catch {
     return { ...defaultState };
@@ -147,7 +158,27 @@ function gameMiniCard(game) {
   `;
 }
 
+function weeklyEntry(gameId) {
+  return state.weeklyEntries[gameId] || emptyWeeklyEntry();
+}
+
+function weeklyProgress(game) {
+  const entry = weeklyEntry(game.id);
+  return Math.min(Object.keys(entry.picks).length, game.fixtures.length);
+}
+
+function weeklyRoute(game) {
+  const entry = weeklyEntry(game.id);
+  return entry.submitted && !entry.editing ? `/${game.id}/submitted` : `/${game.id}`;
+}
+
 function dashboard() {
+  const aflGame = weeklyGames["afl-round"];
+  const nflGame = weeklyGames["nfl-pick6"];
+  const aflEntry = weeklyEntry(aflGame.id);
+  const nflEntry = weeklyEntry(nflGame.id);
+  const aflProgress = weeklyProgress(aflGame);
+  const nflProgress = weeklyProgress(nflGame);
   const top10Route = state.top10Submitted && !state.top10Editing ? "/top10/submitted" : "/top10";
   const survivorRoute = state.survivorSubmitted && !state.survivorEditing ? "/survivor/submitted" : "/survivor";
   const top10Progress = Math.min(state.top10.length, 10);
@@ -155,20 +186,25 @@ function dashboard() {
   const playerGames = [
     { sport: "racing", html: dashboardGameCard("racing", "PICK THE TOP 10", state.top10Submitted ? "ENTRY SUBMITTED" : `${top10Progress}/10 SELECTED`, "Melbourne Cup · $100K", top10Progress * 10, top10Route, state.top10Submitted ? "View entry" : "Make picks") },
     { sport: "racing", html: dashboardGameCard("survivor", "SPRING SURVIVOR", state.survivorSubmitted ? "PICK SUBMITTED" : survivorSelection ? "PICK SAVED" : "ROUND 1 OPEN", survivorSelection ? survivorSelection.name : "Makybe Diva Stakes Day", survivorSelection ? 100 : 0, survivorRoute, state.survivorSubmitted ? "View pick" : "Choose horse") },
+    { sport: "afl", html: dashboardGameCard("afl", "AFL ROUND CARD", aflEntry.submitted ? "ENTRY SUBMITTED" : `${aflProgress}/9 TIPPED`, "Round 24 · $10K weekly", Math.round(aflProgress / 9 * 100), weeklyRoute(aflGame), aflEntry.submitted ? "View entry" : "Make tips") },
     { sport: "afl", html: dashboardGameCard("afl", "AFL FINALS", "ROUND OPEN", "Qualifying finals · $250K", 62, null, "View bracket") },
-    { sport: "nrl", html: dashboardGameCard("nrl", "NRL FINALS", "UPCOMING", "Round 1 opens in 12 days", 0, null, "View game") }
+    { sport: "nrl", html: dashboardGameCard("nrl", "NRL FINALS", "UPCOMING", "Round 1 opens in 12 days", 0, null, "View game") },
+    { sport: "nfl", html: dashboardGameCard("nfl", "NFL WEEKLY PICK 6", nflEntry.submitted ? "ENTRY SUBMITTED" : `${nflProgress}/6 PICKED`, "Week 1 · $25K weekly", Math.round(nflProgress / 6 * 100), weeklyRoute(nflGame), nflEntry.submitted ? "View entry" : "Make picks") }
   ];
-  const visibleGames = dashboardSport === "all" ? playerGames : playerGames.filter((game) => game.sport === dashboardSport);
+  const dashboardFilter = dashboardSport === "more" ? "community" : dashboardSport;
+  const visibleGames = dashboardSport === "all" ? playerGames : playerGames.filter((game) => game.sport === dashboardFilter);
   const schedule = [
+    { sport: "afl", args: ["21", "AUG", "AFL · ROUND 24", "Round Card", "Tips close 7:10PM", "action", "/afl-round"] },
     { sport: "racing", args: ["06", "SEP", "SURVIVOR · ROUND 1", "Makybe Diva Stakes Day", "Picks close 3:55PM", "action", "/survivor"] },
+    { sport: "nfl", args: ["11", "SEP", "NFL · WEEK 1", "Weekly Pick 6", "Picks close 10:15AM", "action", "/nfl-pick6"] },
     { sport: "afl", args: ["12", "SEP", "AFL FINALS", "Semi-final selections", "Picks close 7:20PM", "live"] },
     { sport: "racing", args: ["20", "SEP", "SURVIVOR · ROUND 2", "Underwood Stakes Day", "Advancing players only", "upcoming", "/racing"] },
     { sport: "nrl", args: ["26", "SEP", "NRL FINALS", "Preliminary final picks", "Picks close 7:40PM", "upcoming"] },
-    { sport: "nfl", args: ["05", "OCT", "NFL WEEKLY PICKS", "Week 5 selections", "Opens Monday 9:00AM", "upcoming"] },
+    { sport: "nfl", args: ["05", "OCT", "NFL WEEKLY PICKS", "Week 5 selections", "Opens Monday 9:00AM", "upcoming", "/nfl-pick6"] },
     { sport: "community", args: ["18", "OCT", "PUNT ROAD LEGENDS", "League rivalry round", "24 members competing", "upcoming"] },
     { sport: "racing", args: ["04", "NOV", "PICK THE TOP 10", "Melbourne Cup", "Picks close 2:55PM", "upcoming", "/top10"] }
   ];
-  const visibleSchedule = (dashboardSport === "all" ? schedule.slice(0, 4) : schedule.filter((item) => item.sport === dashboardSport)).slice(0,4);
+  const visibleSchedule = (dashboardSport === "all" ? schedule.slice(0, 4) : schedule.filter((item) => item.sport === dashboardFilter)).slice(0,4);
   const news = [
     { sport: "racing", args: ["feature", "RACING", "Five horses to watch this Spring Carnival", "6 min read"] },
     { sport: "racing", args: ["analysis", "ANALYSIS", "How the Top 10 scoring system rewards bold calls", "4 min read"] },
@@ -181,11 +217,35 @@ function dashboard() {
     { sport: "community", args: ["community", "COMMUNITY", "Inside Punt Road Legends: the league to beat", "3 min read"] },
     { sport: "community", args: ["community", "LEAGUE STORIES", "How Office Footy Tips keeps the rivalry alive", "4 min read"] }
   ];
-  const visibleNews = dashboardSport === "all" ? [news[0], news[2], news[8]] : news.filter((item) => item.sport === dashboardSport);
-  const sportNames = { all: "ALL", racing: "RACING", afl: "AFL", nrl: "NRL", nfl: "NFL", community: "COMMUNITY" };
+  const visibleNews = dashboardSport === "all" ? [news[0], news[2], news[8]] : news.filter((item) => item.sport === dashboardFilter);
+  const sportNames = { all: "ALL", racing: "RACING", afl: "AFL", nrl: "NRL", nfl: "NFL", more: "MORE" };
   const activeSportName = sportNames[dashboardSport] || "ALL";
-  const scheduleAction = dashboardSport === "racing" ? 'data-route="/racing"' : 'data-action="show-coming-soon"';
+  const scheduleRoutes = { racing: "/racing", afl: "/afl-round", nfl: "/nfl-pick6" };
+  const scheduleAction = scheduleRoutes[dashboardSport] ? `data-route="${scheduleRoutes[dashboardSport]}"` : 'data-action="show-coming-soon"';
   const scheduleLabel = dashboardSport === "all" ? "View all deadlines" : `${activeSportName} calendar`;
+  let nextAction = {
+    label: "MELBOURNE CUP", count: `${top10Progress}/10`, title: top10Progress === 10 ? "YOUR TOP 10 IS READY" : `${10 - top10Progress} PICKS LEFT TO MAKE`,
+    copy: top10Progress === 10 ? "Review your order before the field locks." : "Finish ranking the field before selections close.", progress: top10Progress * 10,
+    closes: "CLOSES 4 NOV · 2:55PM AEDT", route: top10Route, cta: state.top10Submitted ? "View entry" : "Continue picking"
+  };
+  if (dashboardSport === "afl") nextAction = {
+    label: "AFL ROUND 24", count: `${aflProgress}/9`, title: aflEntry.submitted ? "ROUND CARD SUBMITTED" : `${9 - aflProgress} MATCHES LEFT TO TIP`,
+    copy: "Complete the round and add your featured-match margin.", progress: Math.round(aflProgress / 9 * 100), closes: "CLOSES 21 AUG · 7:10PM AEST",
+    route: weeklyRoute(aflGame), cta: aflEntry.submitted ? "View entry" : "Continue tipping"
+  };
+  if (dashboardSport === "nfl") nextAction = {
+    label: "NFL WEEK 1", count: `${nflProgress}/6`, title: nflEntry.submitted ? "PICK 6 SUBMITTED" : `${6 - nflProgress} PICKS LEFT TO MAKE`,
+    copy: "Choose six winners and assign your confidence points.", progress: Math.round(nflProgress / 6 * 100), closes: "CLOSES 11 SEP · 10:15AM AEST",
+    route: weeklyRoute(nflGame), cta: nflEntry.submitted ? "View entry" : "Continue picking"
+  };
+  if (dashboardSport === "nrl") nextAction = {
+    label: "NRL FINALS", count: "SOON", title: "ROUND 1 OPENS IN 12 DAYS", copy: "The next NRL competition is being prepared for launch.", progress: 0,
+    closes: "OPENING SOON", route: null, cta: "Preview NRL"
+  };
+  if (dashboardSport === "more") nextAction = {
+    label: "YOUR LEAGUES", count: "3", title: "PUNT ROAD LEGENDS IS HEATING UP", copy: "See the latest movement across your private and community leagues.", progress: 72,
+    closes: "NEXT DEADLINE · FRIDAY", route: null, cta: "View leagues"
+  };
   return `
     ${header()}
     ${sportsRail()}
@@ -196,14 +256,14 @@ function dashboard() {
             <p class="eyebrow red">YOUR WORLDPLAY</p>
             <h1>GOOD AFTERNOON,<br><span>OSCAR.</span></h1>
             <p>Everything you are playing, following and competing in—one place.</p>
-            <div class="home-quick-stats"><span><strong>4</strong> ACTIVE GAMES</span><span><strong>#24</strong> BEST RANK</span><span><strong>3</strong> LEAGUES</span></div>
+            <div class="home-quick-stats"><span><strong>6</strong> ACTIVE GAMES</span><span><strong>#24</strong> BEST RANK</span><span><strong>3</strong> LEAGUES</span></div>
           </div>
           <article class="next-action-card">
-            <div class="next-action-top"><span class="live-dot"></span><small>NEXT ACTION · MELBOURNE CUP</small><span>${top10Progress}/10</span></div>
-            <h2>${top10Progress === 10 ? "YOUR TOP 10 IS READY" : `${10 - top10Progress} PICKS LEFT TO MAKE`}</h2>
-            <p>${top10Progress === 10 ? "Review your order before the field locks." : "Finish ranking the field before selections close."}</p>
-            <div class="action-progress"><span style="width:${top10Progress * 10}%"></span></div>
-            <div class="next-action-footer"><small>CLOSES 4 NOV · 2:55PM AEDT</small><button class="primary-button small" data-route="${top10Route}">${state.top10Submitted ? "View entry" : "Continue picking"}${icon("arrow")}</button></div>
+            <div class="next-action-top"><span class="live-dot"></span><small>NEXT ACTION · ${nextAction.label}</small><span>${nextAction.count}</span></div>
+            <h2>${nextAction.title}</h2>
+            <p>${nextAction.copy}</p>
+            <div class="action-progress"><span style="width:${nextAction.progress}%"></span></div>
+            <div class="next-action-footer"><small>${nextAction.closes}</small><button class="primary-button small" ${nextAction.route ? `data-route="${nextAction.route}"` : 'data-action="show-coming-soon"'}>${nextAction.cta}${icon("arrow")}</button></div>
           </article>
         </div>
       </section>
@@ -274,11 +334,11 @@ function dashboard() {
           <button class="text-button" data-action="show-coming-soon">View all competitions →</button>
         </div>
         <div class="sport-arena-grid">
-          ${sportCard("racing", "RACING", "Melbourne Cup Top 10 + Spring Survivor", "$150K PRIZES", true)}
-          ${sportCard("community", "COMMUNITY", "Create a league and play your way.", "FREE TO JOIN", false)}
-          ${sportCard("afl", "AFL", "Finals predictor", "$10M + $250K", false)}
-          ${sportCard("nrl", "NRL", "Finals predictor", "$5M + $150K", false)}
-          ${sportCard("nfl", "NFL", "Playoff predictor", "$20M + $500K", false)}
+          ${sportCard("racing", "RACING", "Melbourne Cup Top 10 + Spring Survivor", "$150K PRIZES", "/racing")}
+          ${sportCard("afl", "AFL", "Round Card + Finals Predictor", "$10K WEEKLY", "/afl-round")}
+          ${sportCard("nfl", "NFL", "Weekly Pick 6 + Playoff Predictor", "$25K WEEKLY", "/nfl-pick6")}
+          ${sportCard("community", "COMMUNITY", "Create a league and play your way.", "FREE TO JOIN", null)}
+          ${sportCard("nrl", "NRL", "Finals predictor", "$5M + $150K", null)}
         </div>
       </section>
 
@@ -292,7 +352,7 @@ function dashboard() {
 
 function sportsRail() {
   const sports = [
-    ["all", "ALL GAMES"], ["racing", "RACING"], ["afl", "AFL"], ["nrl", "NRL"], ["nfl", "NFL"], ["community", "COMMUNITY"]
+    ["all", "ALL GAMES"], ["racing", "RACING"], ["afl", "AFL"], ["nrl", "NRL"], ["nfl", "NFL"], ["more", "MORE"]
   ];
   return `<nav class="sports-rail" aria-label="Games by sport"><div class="sports-rail-inner">${sports.map(([id, label]) => `<button class="${dashboardSport === id ? "active" : ""}" data-action="sport-filter" data-sport="${id}" ${dashboardSport === id ? 'aria-current="page"' : ""}>${label}</button>`).join("")}</div></nav>`;
 }
@@ -328,10 +388,10 @@ function leagueRow(initials, name, members, rank, signal) {
   return `<button class="league-row" data-action="show-coming-soon"><span class="league-mark">${initials}</span><span><strong>${name}</strong><small>${members}</small></span><span class="league-rank"><small>RANK</small><strong>${rank}</strong></span><em>${signal}</em></button>`;
 }
 
-function sportCard(kind, title, subtitle, prize, active) {
-  return `<article class="sport-card ${kind} ${active ? "active" : ""}">
+function sportCard(kind, title, subtitle, prize, route) {
+  return `<article class="sport-card ${kind} ${route ? "active" : ""}">
     <div class="sport-card-art"><span>${kind === "community" ? "WP" : title}</span></div>
-    <div class="sport-card-body"><span class="sport-tag">${active ? "NEW · FREE TO PLAY" : kind === "community" ? "FREE TO JOIN" : "FREE TO PLAY"}</span><h3>${title}</h3><p>${subtitle}</p><strong>${prize}</strong><button class="sport-card-button" ${active ? 'data-route="/racing"' : 'data-action="show-coming-soon"'}>${active ? "EXPLORE RACING" : "EXPLORE MORE"}${icon("arrow")}</button></div>
+    <div class="sport-card-body"><span class="sport-tag">${route ? "PLAYABLE PROTOTYPE" : kind === "community" ? "FREE TO JOIN" : "FREE TO PLAY"}</span><h3>${title}</h3><p>${subtitle}</p><strong>${prize}</strong><button class="sport-card-button" ${route ? `data-route="${route}"` : 'data-action="show-coming-soon"'}>${route ? `PLAY ${title}` : "EXPLORE MORE"}${icon("arrow")}</button></div>
   </article>`;
 }
 
@@ -575,6 +635,78 @@ function survivorReview() {
   `;
 }
 
+function weeklyFixtureCard(game, fixture, entry) {
+  const pick = entry.picks[fixture.id];
+  const confidence = entry.confidence[fixture.id] || "";
+  const usedConfidence = new Set(Object.entries(entry.confidence).filter(([id]) => id !== fixture.id).map(([, value]) => Number(value)));
+  return `<article class="weekly-fixture ${pick ? "has-pick" : ""} ${fixture.featured ? "featured" : ""}">
+    <div class="weekly-fixture-meta"><span>${fixture.time}</span><span>${fixture.venue}</span>${fixture.featured ? "<strong>FEATURED MARGIN</strong>" : ""}</div>
+    <div class="team-choice-grid">
+      ${[fixture.home, fixture.away].map((team) => `<button class="team-choice ${pick === team.code ? "selected" : ""}" data-action="pick-weekly" data-game="${game.id}" data-fixture="${fixture.id}" data-team="${team.code}">
+        <span class="team-mark" style="--team-colour:${team.color}">${team.code}</span><span><strong>${team.name}</strong><small>${pick === team.code ? "YOUR PICK" : "SELECT"}</small></span>${pick === team.code ? icon("check") : ""}
+      </button>`).join("")}
+    </div>
+    ${game.scoring === "confidence" ? `<label class="confidence-control"><span>CONFIDENCE POINTS</span><select data-weekly-confidence data-game="${game.id}" data-fixture="${fixture.id}" ${pick ? "" : "disabled"}><option value="">SET POINTS</option>${game.fixtures.map((_, index) => { const value = index + 1; return `<option value="${value}" ${Number(confidence) === value ? "selected" : ""} ${usedConfidence.has(value) ? "disabled" : ""}>${value} PT${value === 1 ? "" : "S"}</option>`; }).join("")}</select></label>` : ""}
+    ${fixture.featured ? `<label class="margin-control"><span>YOUR WINNING MARGIN</span><span><input type="number" min="1" max="99" inputmode="numeric" placeholder="00" value="${entry.margin}" data-weekly-margin data-game="${game.id}" aria-label="Featured match winning margin" /> PTS</span></label>` : ""}
+  </article>`;
+}
+
+function weeklySummary(game, entry) {
+  const count = Object.keys(entry.picks).length;
+  return `<aside class="weekly-summary-card">
+    <div class="weekly-summary-head"><p class="eyebrow red">YOUR ENTRY</p><strong>${count}<small>/${game.fixtures.length}</small></strong></div>
+    <div class="game-progress"><span style="width:${Math.round(count / game.fixtures.length * 100)}%"></span></div>
+    <div class="weekly-summary-list">${game.fixtures.map((fixture) => {
+      const code = entry.picks[fixture.id];
+      const team = [fixture.home, fixture.away].find((candidate) => candidate.code === code);
+      return `<div class="weekly-summary-row"><span>${fixture.home.code} v ${fixture.away.code}</span><strong>${team?.code || "—"}</strong>${game.scoring === "confidence" ? `<small>${entry.confidence[fixture.id] ? `${entry.confidence[fixture.id]} PTS` : "NO RANK"}</small>` : ""}</div>`;
+    }).join("")}</div>
+    <div class="weekly-rule">${game.scoring === "confidence" ? `<strong>HOW SCORING WORKS</strong><p>A correct pick earns its confidence value. Use every number from 1 to ${game.fixtures.length} once.</p>` : `<strong>HOW SCORING WORKS</strong><p>One point per correct tip. The featured-match margin breaks tied scores.</p>`}</div>
+    <button class="text-button" data-action="clear-weekly" data-game="${game.id}">Clear entry</button>
+  </aside>`;
+}
+
+function weeklyGameScreen(game) {
+  const entry = weeklyEntry(game.id);
+  const complete = weeklyEntryIsComplete(game, entry);
+  const open = entryIsOpen(game);
+  return `${header()}<main id="app-main" class="weekly-game-page ${game.sport.toLowerCase()}">
+    <section class="weekly-game-hero">
+      <div class="weekly-hero-inner"><button class="back-link" data-route="/dashboard">← Back to dashboard</button><p class="eyebrow red">${game.eyebrow}</p><h1>${game.title}</h1><p>${game.subtitle}</p>
+        <div class="game-meta"><span><small>PRIZE</small><strong>${game.prize}</strong></span><span><small>PICKS CLOSE</small><strong>${game.closes}</strong></span><span><small>FORMAT</small><strong>${game.scoring === "confidence" ? "CONFIDENCE" : "WINNERS + MARGIN"}</strong></span></div>
+      </div>
+    </section>
+    <section class="weekly-workspace">
+      ${entry.editing ? `<div class="edit-notice">${icon("clock")}<div><strong>EDITING SUBMITTED ENTRY</strong><span>Update your picks and resubmit before ${game.closes}.</span></div><button class="text-button" data-action="cancel-weekly-edit" data-game="${game.id}">Cancel edits</button></div>` : ""}
+      <div class="weekly-workspace-heading"><div><p class="eyebrow red">${game.kind === "round" ? "THIS ROUND" : "THIS WEEK"}</p><h2>MAKE YOUR PICKS</h2><p>${game.scoring === "confidence" ? "Choose each winner, then use every confidence value once." : "Tip every match and enter the winning margin for the featured game."}</p></div><span>${Object.keys(entry.picks).length}/${game.fixtures.length} COMPLETE</span></div>
+      <div class="weekly-layout"><div class="weekly-fixture-list">${game.fixtures.map((fixture) => weeklyFixtureCard(game, fixture, entry)).join("")}</div>${weeklySummary(game, entry)}</div>
+    </section>
+    <div class="sticky-action"><div><small>${entry.editing ? "UNSUBMITTED CHANGES" : "ENTRY PROGRESS"}</small><strong>${!open ? "Selections closed" : complete ? "Ready to review" : "Complete every required pick"}</strong></div><button class="primary-button" data-route="/${game.id}/review" ${!complete || !open ? "disabled" : ""}>Review entry${icon("arrow")}</button></div>
+  </main>${footer()}`;
+}
+
+function weeklyReviewScreen(game) {
+  const entry = weeklyEntry(game.id);
+  if (!weeklyEntryIsComplete(game, entry)) return weeklyGameScreen(game);
+  return `${header()}<main id="app-main" class="review-page weekly-review-page">
+    <section class="review-header"><button class="back-link" data-route="/${game.id}">← Edit selections</button><p class="eyebrow red">${game.eyebrow}</p><h1>${entry.editing ? "REVIEW YOUR CHANGES" : "REVIEW YOUR ENTRY"}</h1><p>Every pick can be revised until ${game.closes}.</p></section>
+    <section class="weekly-review-grid"><div class="weekly-review-list">${game.fixtures.map((fixture) => {
+      const code = entry.picks[fixture.id];
+      const team = [fixture.home, fixture.away].find((candidate) => candidate.code === code);
+      return `<article><span class="team-mark" style="--team-colour:${team.color}">${team.code}</span><div><small>${fixture.time} · ${fixture.venue}</small><strong>${team.name}</strong></div>${game.scoring === "confidence" ? `<em>${entry.confidence[fixture.id]} PTS</em>` : fixture.featured ? `<em>${entry.margin} PT MARGIN</em>` : icon("check")}</article>`;
+    }).join("")}</div><aside class="submit-card"><p class="eyebrow red">ENTRY SUMMARY</p><h2>${game.fixtures.length} PICKS READY</h2><dl><div><dt>GAME</dt><dd>${game.title}</dd></div><div><dt>ROUND</dt><dd>${game.eyebrow.replace(`${game.sport} · `, "")}</dd></div><div><dt>DEADLINE</dt><dd>${game.closes}</dd></div></dl><div class="confirm-note">${icon("info")}<p>Submitting saves this entry. You can reopen it and make changes before selections close.</p></div><button class="primary-button full" data-action="submit-weekly" data-game="${game.id}">${entry.editing ? "Resubmit entry" : "Submit entry"}${icon("arrow")}</button></aside></section>
+  </main>${footer()}`;
+}
+
+function weeklySuccessScreen(game) {
+  const entry = weeklyEntry(game.id);
+  const picks = entry.submittedPicks;
+  return `${header()}<main id="app-main" class="success-page weekly-success-page"><section class="success-card"><span class="success-icon">${icon("check")}</span><p class="eyebrow red">ENTRY SUBMITTED</p><h1>${game.title}<br>IS LOCKED IN.</h1><p>Your ${game.sport} entry has been saved. You can revise it until ${game.closes}.</p><div class="weekly-success-picks">${game.fixtures.map((fixture) => {
+    const code = picks[fixture.id]; const team = [fixture.home, fixture.away].find((candidate) => candidate.code === code);
+    return `<span><b>${team?.code}</b>${game.scoring === "confidence" ? `${entry.submittedConfidence[fixture.id]} PTS` : fixture.featured ? `${entry.submittedMargin} MARGIN` : "PICKED"}</span>`;
+  }).join("")}</div><div class="success-actions"><button class="primary-button" data-action="edit-weekly" data-game="${game.id}">Edit selections${icon("arrow")}</button><button class="ghost-button" data-route="/dashboard">Return to dashboard</button></div></section></main>${footer()}`;
+}
+
 function rulesDialog() {
   return `
     <div class="modal-shell" role="dialog" aria-modal="true" aria-labelledby="rules-title">
@@ -592,8 +724,17 @@ function rulesDialog() {
 
 function render({ preserveScroll = false } = {}) {
   const route = currentRoute();
+  const weeklyMatch = route.match(/^\/(afl-round|nfl-pick6)(?:\/(review|submitted))?$/);
   let html;
-  if (route === "/dashboard") html = dashboard();
+  if (weeklyMatch) {
+    const game = weeklyGameById(weeklyMatch[1]);
+    const phase = weeklyMatch[2];
+    const entry = weeklyEntry(game.id);
+    if (phase === "review") html = weeklyReviewScreen(game);
+    else if (phase === "submitted" && entry.submitted) html = weeklySuccessScreen(game);
+    else html = entry.submitted && !entry.editing ? weeklySuccessScreen(game) : weeklyGameScreen(game);
+  }
+  else if (route === "/dashboard") html = dashboard();
   else if (route === "/racing") html = racingHub();
   else if (route === "/top10/review") html = top10Review();
   else if (route === "/top10/submitted") html = successScreen("top10");
@@ -676,7 +817,7 @@ document.addEventListener("click", (event) => {
   const { action, id } = target.dataset;
   if (action === "toggle-menu") toggleMenu();
   if (action === "show-rules") { toggleMenu(false); showRules(); }
-  if (action === "show-coming-soon") toast("This competition is shown for context — racing is the active prototype.");
+  if (action === "show-coming-soon") toast("This competition is shown for context — Racing, AFL and NFL prototypes are playable.");
   if (action === "sport-filter") {
     dashboardSport = target.dataset.sport || "all";
     render({ preserveScroll: true });
@@ -750,9 +891,78 @@ document.addEventListener("click", (event) => {
     state.survivorEditing = false;
     saveState(); go("/survivor/submitted"); toast("Edits cancelled");
   }
-  if (action === "reset-demo") {
-    state = { ...defaultState, top10: [], top10SubmittedPicks: [] }; saveState(); toggleMenu(false); go("/dashboard"); render(); toast("Prototype data reset");
+  if (action === "pick-weekly") {
+    const game = weeklyGameById(target.dataset.game);
+    if (!game || !requireOpenEntry(game)) return;
+    const fixture = game.fixtures.find((item) => item.id === target.dataset.fixture);
+    if (!fixture || ![fixture.home.code, fixture.away.code].includes(target.dataset.team)) return;
+    weeklyEntry(game.id).picks[fixture.id] = target.dataset.team;
+    saveState(); render({ preserveScroll: true }); toast(`${target.dataset.team} selected`);
   }
+  if (action === "clear-weekly") {
+    const game = weeklyGameById(target.dataset.game);
+    if (!game || !requireOpenEntry(game)) return;
+    const entry = weeklyEntry(game.id);
+    entry.picks = {}; entry.confidence = {}; entry.margin = "";
+    saveState(); render({ preserveScroll: true });
+  }
+  if (action === "submit-weekly") {
+    const game = weeklyGameById(target.dataset.game);
+    const entry = game ? weeklyEntry(game.id) : null;
+    if (!game || !entry || !requireOpenEntry(game) || !weeklyEntryIsComplete(game, entry)) return;
+    entry.submitted = true;
+    entry.submittedPicks = { ...entry.picks };
+    entry.submittedConfidence = { ...entry.confidence };
+    entry.submittedMargin = entry.margin;
+    entry.editing = false;
+    saveState(); go(`/${game.id}/submitted`); toast(`${game.title} submitted`);
+  }
+  if (action === "edit-weekly") {
+    const game = weeklyGameById(target.dataset.game);
+    if (!game || !requireOpenEntry(game)) return;
+    const entry = weeklyEntry(game.id);
+    entry.picks = { ...entry.submittedPicks };
+    entry.confidence = { ...entry.submittedConfidence };
+    entry.margin = entry.submittedMargin;
+    entry.editing = true;
+    saveState(); go(`/${game.id}`); toast(`${game.title} reopened for editing`);
+  }
+  if (action === "cancel-weekly-edit") {
+    const game = weeklyGameById(target.dataset.game);
+    if (!game) return;
+    const entry = weeklyEntry(game.id);
+    entry.picks = { ...entry.submittedPicks };
+    entry.confidence = { ...entry.submittedConfidence };
+    entry.margin = entry.submittedMargin;
+    entry.editing = false;
+    saveState(); go(`/${game.id}/submitted`); toast("Edits cancelled");
+  }
+  if (action === "reset-demo") {
+    state = JSON.parse(JSON.stringify(defaultState)); saveState(); toggleMenu(false); go("/dashboard"); render(); toast("Prototype data reset");
+  }
+});
+
+document.addEventListener("change", (event) => {
+  const control = event.target.closest("[data-weekly-confidence]");
+  if (!control) return;
+  const game = weeklyGameById(control.dataset.game);
+  if (!game || !requireOpenEntry(game)) return;
+  const entry = weeklyEntry(game.id);
+  if (control.value) entry.confidence[control.dataset.fixture] = Number(control.value);
+  else delete entry.confidence[control.dataset.fixture];
+  saveState(); render({ preserveScroll: true });
+});
+
+document.addEventListener("input", (event) => {
+  const control = event.target.closest("[data-weekly-margin]");
+  if (!control) return;
+  const game = weeklyGameById(control.dataset.game);
+  if (!game || !entryIsOpen(game)) return;
+  const entry = weeklyEntry(game.id);
+  entry.margin = control.value.replace(/\D/g, "").slice(0,2);
+  const reviewButton = document.querySelector(`[data-route="/${game.id}/review"]`);
+  if (reviewButton) reviewButton.disabled = !weeklyEntryIsComplete(game, entry);
+  saveState();
 });
 
 document.addEventListener("dragstart", (event) => {

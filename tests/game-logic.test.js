@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { melbourneCupRunners, survivorOpeningRunners } from "../data.js";
-import { entryIsOpen, moveRankedSelection, normalizePrototypeState } from "../game-logic.js";
+import { melbourneCupRunners, survivorOpeningRunners, weeklyGames } from "../data.js";
+import { emptyWeeklyEntry, entryIsOpen, moveRankedSelection, normalizePrototypeState, normalizeWeeklyEntries, weeklyEntryIsComplete } from "../game-logic.js";
 
 test("entries close exactly at the server-shaped deadline value", () => {
   const game = { deadline: "2026-11-04T14:55:00+11:00" };
@@ -41,4 +41,29 @@ test("stale or cross-game saved selections are discarded", () => {
   assert.equal(normalized.survivorPick, null);
   assert.equal(normalized.survivorSubmitted, false);
   assert.equal(normalized.survivorEditing, false);
+});
+
+test("shared weekly game validation supports margins and confidence scoring", () => {
+  const afl = weeklyGames["afl-round"];
+  const aflEntry = emptyWeeklyEntry();
+  afl.fixtures.forEach((fixture) => { aflEntry.picks[fixture.id] = fixture.home.code; });
+  assert.equal(weeklyEntryIsComplete(afl, aflEntry), false);
+  aflEntry.margin = "12";
+  assert.equal(weeklyEntryIsComplete(afl, aflEntry), true);
+
+  const nfl = weeklyGames["nfl-pick6"];
+  const nflEntry = emptyWeeklyEntry();
+  nfl.fixtures.forEach((fixture, index) => {
+    nflEntry.picks[fixture.id] = fixture.away.code;
+    nflEntry.confidence[fixture.id] = index + 1;
+  });
+  assert.equal(weeklyEntryIsComplete(nfl, nflEntry), true);
+  nflEntry.confidence[nfl.fixtures[1].id] = 1;
+  assert.equal(weeklyEntryIsComplete(nfl, nflEntry), false);
+});
+
+test("weekly state normalization removes invalid saved teams", () => {
+  const entries = normalizeWeeklyEntries({ "afl-round": { picks: { "afl-carl-coll": "XXX" } } }, weeklyGames);
+  assert.deepEqual(entries["afl-round"].picks, {});
+  assert.ok(entries["nfl-pick6"]);
 });

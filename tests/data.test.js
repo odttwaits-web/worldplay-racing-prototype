@@ -7,7 +7,8 @@ import {
   runnerById,
   survivorGame,
   survivorOpeningRunners,
-  topTenGame
+  topTenGame,
+  weeklyGames
 } from "../data.js";
 
 test("the spring campaign contains ten meetings", () => {
@@ -50,5 +51,16 @@ test("each Survivor meeting exposes future-ready race metadata", () => {
     assert.ok(meeting.venue);
     assert.ok(meeting.featureRace);
     assert.ok(["open", "upcoming", "closed", "complete"].includes(meeting.status));
+  }
+});
+
+test("weekly sports games use the shared fixture schema", () => {
+  assert.equal(weeklyGames["afl-round"].fixtures.length, 9);
+  assert.equal(weeklyGames["afl-round"].scoring, "one-point");
+  assert.equal(weeklyGames["nfl-pick6"].fixtures.length, 6);
+  assert.equal(weeklyGames["nfl-pick6"].scoring, "confidence");
+  for (const game of Object.values(weeklyGames)) {
+    assert.ok(Number.isFinite(Date.parse(game.deadline)));
+    assert.ok(game.fixtures.every((fixture) => fixture.home.code && fixture.away.code));
   }
 });

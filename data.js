@@ -75,6 +75,67 @@ export const survivorGame = {
   race: "Makybe Diva Stakes Day · Feature Race"
 };
 
+// Weekly prediction formats share this schema so new sports can be added as
+// data, without requiring a bespoke screen or submission flow for every game.
+export const weeklyGames = {
+  "afl-round": {
+    id: "afl-round",
+    sport: "AFL",
+    kind: "round",
+    eyebrow: "AFL · ROUND 24",
+    title: "ROUND CARD",
+    subtitle: "Pick every winner and call the featured-match margin.",
+    prize: "$10K WEEKLY",
+    closes: "21 AUG · 7:10PM AEST",
+    deadline: "2026-08-21T19:10:00+10:00",
+    featuredFixtureId: "afl-carl-coll",
+    scoring: "one-point",
+    fixtures: [
+      fixture("afl-carl-coll", "FRI · 7:20PM", "MCG", team("CAR", "Carlton", "#163c77"), team("COL", "Collingwood", "#ededed"), true),
+      fixture("afl-geel-rich", "SAT · 1:45PM", "GMHBA Stadium", team("GEE", "Geelong", "#1b365d"), team("RIC", "Richmond", "#f7d117")),
+      fixture("afl-syd-bris", "SAT · 4:35PM", "SCG", team("SYD", "Sydney", "#e11b22"), team("BRI", "Brisbane", "#7b1734")),
+      fixture("afl-haw-ess", "SAT · 7:25PM", "MCG", team("HAW", "Hawthorn", "#5b2c1f"), team("ESS", "Essendon", "#d71920")),
+      fixture("afl-fre-wce", "SAT · 8:10PM", "Optus Stadium", team("FRE", "Fremantle", "#2a0a5e"), team("WCE", "West Coast", "#17458f")),
+      fixture("afl-adel-port", "SUN · 1:10PM", "Adelaide Oval", team("ADE", "Adelaide", "#002b5c"), team("PTA", "Port Adelaide", "#00a6b2")),
+      fixture("afl-wb-stk", "SUN · 3:20PM", "Marvel Stadium", team("WBD", "Western Bulldogs", "#1c63b7"), team("STK", "St Kilda", "#ed1b2f")),
+      fixture("afl-mel-nm", "SUN · 4:40PM", "MCG", team("MEL", "Melbourne", "#0b2545"), team("NMA", "North Melbourne", "#0072bc")),
+      fixture("afl-gc-gws", "SUN · 6:10PM", "People First Stadium", team("GCS", "Gold Coast", "#e21a2d"), team("GWS", "GWS Giants", "#f47920"))
+    ]
+  },
+  "nfl-pick6": {
+    id: "nfl-pick6",
+    sport: "NFL",
+    kind: "weekly",
+    eyebrow: "NFL · WEEK 1",
+    title: "WEEKLY PICK 6",
+    subtitle: "Pick six winners, then rank each call by confidence.",
+    prize: "$25K WEEKLY",
+    closes: "11 SEP · 10:15AM AEST",
+    deadline: "2026-09-11T10:15:00+10:00",
+    scoring: "confidence",
+    fixtures: [
+      fixture("nfl-dal-phi", "FRI · 10:20AM", "Lincoln Financial Field", team("DAL", "Dallas Cowboys", "#003594"), team("PHI", "Philadelphia Eagles", "#004c54")),
+      fixture("nfl-kc-lac", "SAT · 10:00AM", "SoFi Stadium", team("KC", "Kansas City Chiefs", "#e31837"), team("LAC", "LA Chargers", "#0080c6")),
+      fixture("nfl-gb-det", "MON · 3:00AM", "Lambeau Field", team("GB", "Green Bay Packers", "#203731"), team("DET", "Detroit Lions", "#0076b6")),
+      fixture("nfl-buf-bal", "MON · 6:25AM", "Highmark Stadium", team("BUF", "Buffalo Bills", "#00338d"), team("BAL", "Baltimore Ravens", "#241773")),
+      fixture("nfl-sf-sea", "MON · 6:25AM", "Levi's Stadium", team("SF", "San Francisco 49ers", "#aa0000"), team("SEA", "Seattle Seahawks", "#002244")),
+      fixture("nfl-cin-cle", "MON · 10:20AM", "Paycor Stadium", team("CIN", "Cincinnati Bengals", "#fb4f14"), team("CLE", "Cleveland Browns", "#311d00"))
+    ]
+  }
+};
+
+function team(code, name, color) {
+  return { code, name, color };
+}
+
+function fixture(id, time, venue, home, away, featured = false) {
+  return { id, time, venue, home, away, featured };
+}
+
+export function weeklyGameById(id) {
+  return weeklyGames[id] || null;
+}
+
 export const leaderboard = [
   { rank: 1, player: "brave-saddle-21", game: "Survivor", score: "ALIVE" },
   { rank: 2, player: "trackside-tom", game: "Top 10", score: "82 PTS" },

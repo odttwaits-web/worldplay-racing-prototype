@@ -154,6 +154,7 @@ h1, h2, h3 { margin: 0; font-family: var(--condensed); font-weight: 900; text-tr
 .dashboard-game-card.survivor::after { background: radial-gradient(circle,rgba(226,255,67,.15),transparent 66%); }
 .dashboard-game-card.afl::after { background: radial-gradient(circle,rgba(188,30,43,.24),transparent 66%); }
 .dashboard-game-card.nrl::after { background: radial-gradient(circle,rgba(41,143,133,.2),transparent 66%); }
+.dashboard-game-card.nfl::after { background: radial-gradient(circle,rgba(32,95,50,.28),transparent 66%); }
 .dashboard-game-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .game-sport { color: var(--red); font: 700 7px/1 var(--compact-font); letter-spacing: .13em; }
 .dashboard-game-card.survivor .game-sport { color: var(--lime); }
@@ -570,6 +571,68 @@ dd { margin: 0; font-size: 11px; font-weight: 800; text-align: right; }
 .survival-rule > div span { color: var(--muted); font-size: 10px; line-height: 1.45; }
 .survival-rule .primary-button { margin-top: auto; }
 
+.weekly-game-page { padding-bottom: 76px; }
+.weekly-game-hero { min-height: 330px; position: relative; isolation: isolate; display: grid; align-items: center; overflow: hidden; border-bottom: 1px solid var(--border); background: #0d0d0e; }
+.weekly-game-hero::before { content: ""; position: absolute; z-index: -2; inset: 0; background: linear-gradient(90deg,#09090b 0%,rgba(9,9,11,.91) 48%,rgba(9,9,11,.45)),url("./assets/worldplay-stadium.webp") center / cover no-repeat; }
+.weekly-game-hero::after { content: ""; position: absolute; z-index: -1; width: 55vw; height: 55vw; right: -20vw; top: -28vw; border-radius: 50%; background: radial-gradient(circle,rgba(255,23,39,.25),transparent 65%); }
+.weekly-game-page.nfl .weekly-game-hero::after { background: radial-gradient(circle,rgba(32,95,50,.38),transparent 65%); }
+.weekly-hero-inner { width: min(1180px,calc(100% - 32px)); margin: auto; padding: 38px 0 42px; }
+.weekly-hero-inner .back-link { margin-bottom: 48px; }
+.weekly-hero-inner h1 { max-width: 820px; font-size: clamp(62px,8vw,108px); }
+.weekly-hero-inner > p:not(.eyebrow) { max-width: 580px; margin: 10px 0 24px; color: var(--warm); font-size: 13px; line-height: 1.5; }
+.weekly-hero-inner .game-meta { justify-content: flex-start; }
+.weekly-workspace { width: min(1180px,calc(100% - 32px)); margin: auto; padding: 44px 0 70px; }
+.weekly-workspace-heading { margin-bottom: 22px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
+.weekly-workspace-heading h2 { font-size: clamp(38px,4vw,56px); }
+.weekly-workspace-heading p:not(.eyebrow) { margin: 7px 0 0; color: var(--muted); font-size: 10px; }
+.weekly-workspace-heading > span { padding: 8px 11px; border: 1px solid var(--border); border-radius: 999px; color: var(--warm); font: 700 8px/1 var(--compact-font); letter-spacing: .08em; }
+.weekly-layout { display: grid; grid-template-columns: minmax(0,1.65fr) minmax(280px,.65fr); align-items: start; gap: 14px; }
+.weekly-fixture-list { display: grid; gap: 8px; }
+.weekly-fixture { padding: 13px; border: 1px solid rgba(255,255,255,.11); border-radius: 8px; background: var(--surface); transition: border-color .18s,background .18s; }
+.weekly-fixture.has-pick { border-color: rgba(255,255,255,.22); background: linear-gradient(90deg,rgba(255,255,255,.025),var(--surface)); }
+.weekly-fixture.featured { box-shadow: inset 2px 0 var(--red); }
+.weekly-fixture-meta { min-height: 20px; display: flex; align-items: center; gap: 9px; color: var(--muted); font: 700 7px/1 var(--compact-font); letter-spacing: .06em; }
+.weekly-fixture-meta span + span::before { content: "·"; margin-right: 9px; }
+.weekly-fixture-meta strong { margin-left: auto; color: var(--red); font-size: 7px; letter-spacing: .09em; }
+.team-choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.team-choice { min-height: 58px; padding: 8px 10px; display: grid; grid-template-columns: 38px 1fr auto; align-items: center; gap: 9px; border: 1px solid rgba(255,255,255,.09); border-radius: 6px; background: #171717; text-align: left; cursor: pointer; transition: border-color .16s,background .16s,transform .16s; }
+.team-choice:hover { transform: translateY(-1px); border-color: rgba(255,255,255,.24); }
+.team-choice.selected { border-color: var(--green); background: linear-gradient(90deg,rgba(38,227,107,.09),#171717 68%); }
+.team-choice > span:nth-child(2) { min-width: 0; display: grid; gap: 4px; }
+.team-choice strong { overflow: hidden; color: #fff; font: 900 15px/1 var(--condensed); text-transform: uppercase; text-overflow: ellipsis; white-space: nowrap; }
+.team-choice small { color: var(--muted); font: 700 6px/1 var(--compact-font); letter-spacing: .09em; }
+.team-choice.selected small, .team-choice > svg { color: var(--green); }
+.team-mark { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: var(--team-colour); color: #fff; border: 1px solid rgba(255,255,255,.22); box-shadow: inset 0 0 0 3px rgba(0,0,0,.16); font: 900 9px/1 var(--compact-font); }
+.confidence-control, .margin-control { min-height: 41px; margin-top: 9px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-top: 1px solid rgba(255,255,255,.08); color: var(--muted); font: 700 7px/1 var(--compact-font); letter-spacing: .08em; }
+.confidence-control select { min-width: 112px; padding: 7px 28px 7px 9px; border: 1px solid var(--border); border-radius: 5px; background: #111; color: #fff; font: 700 8px/1 var(--compact-font); }
+.confidence-control select:disabled { opacity: .42; }
+.margin-control input { width: 50px; padding: 6px 5px; border: 1px solid var(--border); border-radius: 5px; background: #111; color: #fff; text-align: center; font: 900 17px/1 var(--condensed); }
+.weekly-summary-card { position: sticky; top: 132px; padding: 20px; border: 1px solid var(--border); border-radius: 8px; background: #181818; }
+.weekly-summary-head { display: flex; align-items: end; justify-content: space-between; margin-bottom: 13px; }
+.weekly-summary-head .eyebrow { margin: 0; }
+.weekly-summary-head > strong { font: 900 38px/.8 var(--condensed); }
+.weekly-summary-head > strong small { color: var(--muted); font-size: 18px; }
+.weekly-summary-list { display: grid; margin-top: 18px; }
+.weekly-summary-row { min-height: 38px; display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 9px; border-top: 1px solid rgba(255,255,255,.08); }
+.weekly-summary-row span { color: var(--muted); font-size: 8px; }
+.weekly-summary-row strong { font: 900 13px/1 var(--compact-font); }
+.weekly-summary-row small { min-width: 35px; color: var(--red); font: 700 6px/1 var(--compact-font); text-align: right; }
+.weekly-rule { margin: 17px 0; padding: 13px; border-radius: 6px; background: rgba(255,255,255,.035); }
+.weekly-rule strong { font: 700 7px/1 var(--compact-font); letter-spacing: .09em; }
+.weekly-rule p { margin: 7px 0 0; color: var(--muted); font-size: 8px; line-height: 1.5; }
+.weekly-review-grid { padding: 30px 0; display: grid; grid-template-columns: 1.45fr .75fr; align-items: start; gap: 20px; }
+.weekly-review-list { overflow: hidden; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.weekly-review-list article { min-height: 66px; padding: 9px 15px; display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.weekly-review-list article:last-child { border: 0; }
+.weekly-review-list article > div { display: grid; gap: 4px; }
+.weekly-review-list small { color: var(--muted); font-size: 7px; }
+.weekly-review-list strong { font: 900 17px/1 var(--condensed); text-transform: uppercase; }
+.weekly-review-list em { padding: 5px 7px; border: 1px solid var(--border); border-radius: 999px; color: var(--warm); font: normal 700 7px/1 var(--compact-font); }
+.weekly-success-picks { margin: 0 auto 28px; display: grid; grid-template-columns: repeat(3,1fr); overflow: hidden; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.weekly-success-picks span { min-height: 58px; padding: 10px; display: grid; place-items: center; gap: 4px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); color: var(--muted); font-size: 7px; }
+.weekly-success-picks span:nth-child(3n) { border-right: 0; }
+.weekly-success-picks span b { color: #fff; font: 900 15px/1 var(--compact-font); }
+
 .modal-open { overflow: hidden; }
 .modal-shell { position: fixed; inset: 0; z-index: 300; display: grid; place-items: center; padding: 20px; }
 .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.82); border: 0; backdrop-filter: blur(8px); }
@@ -617,6 +680,7 @@ dd { margin: 0; font-size: 11px; font-weight: 800; text-align: right; }
   .survivor-review-card { grid-template-columns: .8fr 1.2fr; }
   .survival-rule { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--border); }
   .game-hero-grid { grid-template-columns: 1.2fr .8fr; gap: 40px; }
+  .weekly-layout { grid-template-columns: minmax(0,1.45fr) minmax(260px,.7fr); }
 }
 
 @media (max-width: 760px) {
@@ -738,6 +802,21 @@ dd { margin: 0; font-size: 11px; font-weight: 800; text-align: right; }
   .survivor-review-card { grid-template-columns: 1fr; }
   .survivor-review-visual { min-height: 280px; }
   .survivor-review-copy { padding: 28px; }
+  .weekly-hero-inner { padding-top: 28px; }
+  .weekly-hero-inner .back-link { margin-bottom: 38px; }
+  .weekly-hero-inner h1 { font-size: 62px; }
+  .weekly-hero-inner .game-meta { display: grid; grid-template-columns: 1fr 1fr; }
+  .weekly-hero-inner .game-meta span:last-child { grid-column: 1 / -1; }
+  .weekly-workspace { width: min(100% - 28px,1180px); padding-top: 34px; }
+  .weekly-workspace-heading { align-items: flex-start; flex-direction: column; }
+  .weekly-layout, .weekly-review-grid { grid-template-columns: 1fr; }
+  .weekly-summary-card { position: static; order: -1; }
+  .weekly-summary-list { grid-template-columns: 1fr 1fr; column-gap: 12px; }
+  .team-choice-grid { grid-template-columns: 1fr; }
+  .weekly-review-page { width: min(100% - 28px,1024px); }
+  .weekly-success-picks { grid-template-columns: repeat(2,1fr); }
+  .weekly-success-picks span:nth-child(3n) { border-right: 1px solid var(--border); }
+  .weekly-success-picks span:nth-child(2n) { border-right: 0; }
   .sticky-action { min-height: 75px; }
   .sticky-action > div { display: none; }
   .sticky-action .primary-button { width: 100%; }
