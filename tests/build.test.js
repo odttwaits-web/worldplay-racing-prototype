@@ -63,3 +63,13 @@ test("playable screens expose a persistent cross-game switcher", async () => {
   assert.match(client, /gameSwitcher\("survivor"\)/);
   assert.match(client, /gameSwitcher\(game\.id\)/);
 });
+
+test("the league hub supports every sport and core social league task", async () => {
+  const client = await readFile(join(root, "dist/client/app.js"), "utf8");
+  for (const label of ["ALL LEAGUES", "PLAY TOGETHER", "YOUR LEAGUES", "LEAGUE PULSE", "DISCOVER", "RACING", "AFL", "NRL", "NFL"]) {
+    assert.match(client, new RegExp(label));
+  }
+  assert.match(client, /const leagueMatch = route\.match/);
+  assert.match(client, /data-action="create-league"/);
+  assert.match(client, /data-action="join-league"/);
+});

@@ -38,6 +38,20 @@ let state = loadState();
 let dragPayload = null;
 let dashboardSport = "all";
 
+const playerLeagues = [
+  { id: "punt-road", sport: "afl", initials: "PR", name: "Punt Road Legends", privacy: "PRIVATE", members: 24, rank: 3, movement: "+2", leader: "@sarah_k", score: "1,842", deadline: "AFL Round 24 · Fri 7:10PM", tone: "red" },
+  { id: "spring-carnival", sport: "racing", initials: "SC", name: "Spring Carnival", privacy: "COMMUNITY", members: 18, rank: 7, movement: "+5", leader: "@trackside_tom", score: "1,690", deadline: "Makybe Diva Stakes · 6 Sep", tone: "lime" },
+  { id: "storm-chasers", sport: "nrl", initials: "ST", name: "Storm Chasers", privacy: "PRIVATE", members: 16, rank: 5, movement: "−1", leader: "@big_cat_dan", score: "1,608", deadline: "Finals Round 1 · 12 Sep", tone: "teal" },
+  { id: "sunday-gridiron", sport: "nfl", initials: "SG", name: "Sunday Gridiron", privacy: "PUBLIC", members: 32, rank: 9, movement: "+3", leader: "@fourth_down", score: "1,574", deadline: "NFL Week 1 · 11 Sep", tone: "green" }
+];
+
+const discoverLeagues = [
+  { sport: "racing", initials: "FS", name: "Flemington Social", members: "2.4K members", activity: "VERY ACTIVE", leader: "@cupday_club" },
+  { sport: "afl", initials: "MC", name: "MCG Predictors", members: "18.9K members", activity: "HIGH", leader: "@footyoracle" },
+  { sport: "nrl", initials: "RL", name: "Rugby League Nation", members: "12.7K members", activity: "HIGH", leader: "@tryline_tips" },
+  { sport: "nfl", initials: "4D", name: "Fourth Down Club", members: "8.6K members", activity: "VERY ACTIVE", leader: "@redzone_reader" }
+];
+
 function loadState() {
   try {
     const loaded = normalizePrototypeState(
@@ -104,6 +118,7 @@ function header() {
       <aside>
         <div class="drawer-header"><span class="avatar">OT</span><div><small>WELCOME BACK</small><strong>Oscar</strong></div></div>
         <button data-route="/dashboard">Dashboard</button>
+        <button data-route="/leagues">My leagues</button>
         <button data-route="/racing">Flemington games</button>
         <button data-action="show-rules">How to play</button>
         <button data-action="reset-demo" class="danger-link">Reset prototype data</button>
@@ -199,7 +214,7 @@ function dashboard() {
     { sport: "racing", args: ["20", "SEP", "SURVIVOR · ROUND 2", "Underwood Stakes Day", "Advancing players only", "upcoming", "/racing"] },
     { sport: "nrl", args: ["26", "SEP", "NRL FINALS", "Preliminary final picks", "Picks close 7:40PM", "upcoming"] },
     { sport: "nfl", args: ["05", "OCT", "NFL WEEKLY PICKS", "Week 5 selections", "Opens Monday 9:00AM", "upcoming", "/nfl-pick6"] },
-    { sport: "community", args: ["18", "OCT", "PUNT ROAD LEGENDS", "League rivalry round", "24 members competing", "upcoming"] },
+    { sport: "community", args: ["18", "OCT", "PUNT ROAD LEGENDS", "League rivalry round", "24 members competing", "upcoming", "/leagues/afl"] },
     { sport: "racing", args: ["04", "NOV", "PICK THE TOP 10", "Melbourne Cup", "Picks close 2:55PM", "upcoming", "/top10"] }
   ];
   const visibleSchedule = (dashboardSport === "all" ? schedule.slice(0, 4) : schedule.filter((item) => item.sport === dashboardFilter)).slice(0,4);
@@ -241,8 +256,8 @@ function dashboard() {
     closes: "OPENING SOON", route: null, cta: "Preview NRL"
   };
   if (dashboardSport === "community") nextAction = {
-    label: "YOUR LEAGUES", count: "3", title: "PUNT ROAD LEGENDS IS HEATING UP", copy: "See the latest movement across your private and community leagues.", progress: 72,
-    closes: "NEXT DEADLINE · FRIDAY", route: null, cta: "View leagues"
+    label: "YOUR LEAGUES", count: "4", title: "PUNT ROAD LEGENDS IS HEATING UP", copy: "See the latest movement across your private and community leagues.", progress: 72,
+    closes: "NEXT DEADLINE · FRIDAY", route: "/leagues", cta: "View leagues"
   };
   return `
     ${header()}
@@ -254,7 +269,7 @@ function dashboard() {
             <p class="eyebrow red">YOUR WORLDPLAY</p>
             <h1>GOOD AFTERNOON,<br><span>OSCAR.</span></h1>
             <p>Everything you are playing, following and competing in—one place.</p>
-            <div class="home-quick-stats"><span><strong>4</strong> ACTIVE GAMES</span><span><strong>#24</strong> BEST GAME RANK</span><span><strong>3</strong> LEAGUES</span></div>
+            <div class="home-quick-stats"><span><strong>4</strong> ACTIVE GAMES</span><span><strong>#24</strong> BEST GAME RANK</span><span><strong>4</strong> LEAGUES</span></div>
           </div>
           <article class="next-action-card">
             <div class="next-action-top"><span class="live-dot"></span><small>NEXT ACTION · ${nextAction.label}</small><span>${nextAction.count}</span></div>
@@ -307,11 +322,11 @@ function dashboard() {
           <section class="sidebar-card leagues-card">
             <div class="sidebar-heading"><div><p class="eyebrow red">SOCIAL</p><h2>MY LEAGUES</h2></div><button class="icon-button" data-action="show-coming-soon" aria-label="Create a league">+</button></div>
             <div class="league-list">
-              ${leagueRow("PR", "Punt Road Legends", "24 members", "#3", "2 NEW")}
-              ${leagueRow("OF", "Office Footy Tips", "58 members", "#12", "FRI")}
-              ${leagueRow("SC", "Spring Carnival", "18 members", "#7", "LIVE")}
+              ${leagueRow("PR", "Punt Road Legends", "24 members · AFL", "#3", "2 NEW", "/leagues/afl")}
+              ${leagueRow("SC", "Spring Carnival", "18 members · Racing", "#7", "LIVE", "/leagues/racing")}
+              ${leagueRow("SG", "Sunday Gridiron", "32 members · NFL", "#9", "SUN", "/leagues/nfl")}
             </div>
-            <button class="outline-button full small" data-action="show-coming-soon">Explore community leagues</button>
+            <button class="outline-button full small" data-route="/leagues">View all leagues${icon("arrow")}</button>
           </section>
 
           <section class="sidebar-card activity-card">
@@ -335,7 +350,7 @@ function dashboard() {
           ${sportCard("racing", "RACING", "Melbourne Cup Top 10 + Spring Survivor", "$150K PRIZES", "/racing")}
           ${sportCard("afl", "AFL", "Round Card + Finals Predictor", "$10K WEEKLY", "/afl-round")}
           ${sportCard("nfl", "NFL", "Weekly Pick 6 + Playoff Predictor", "$25K WEEKLY", "/nfl-pick6")}
-          ${sportCard("community", "COMMUNITY", "Create a league and play your way.", "FREE TO JOIN", null)}
+          ${sportCard("community", "COMMUNITY", "Create a league and play your way.", "FREE TO JOIN", "/leagues")}
           ${sportCard("nrl", "NRL", "Finals predictor", "$5M + $150K", null)}
         </div>
       </section>
@@ -357,7 +372,7 @@ function sportsRail() {
     <details class="sports-more ${dashboardSport === "community" ? "active" : ""}">
       <summary ${dashboardSport === "community" ? 'aria-current="page"' : ""}>MORE</summary>
       <div class="sports-more-menu">
-        <button data-action="sport-filter" data-sport="community">COMMUNITY &amp; LEAGUES</button>
+        <button data-route="/leagues">COMMUNITY &amp; LEAGUES</button>
         <button data-action="show-coming-soon">CRICKET <span>COMING SOON</span></button>
         <button data-action="show-coming-soon">BASKETBALL <span>COMING SOON</span></button>
       </div>
@@ -393,8 +408,8 @@ function newsCard(kind, category, title, meta) {
   return `<article class="dashboard-news-card ${kind}"><div class="news-art"></div><div><small>${category}</small><h3>${title}</h3><p>${meta}</p><button data-action="show-coming-soon" aria-label="Read ${title}">${icon("arrow")}</button></div></article>`;
 }
 
-function leagueRow(initials, name, members, rank, signal) {
-  return `<button class="league-row" data-action="show-coming-soon"><span class="league-mark">${initials}</span><span><strong>${name}</strong><small>${members}</small></span><span class="league-rank"><small>RANK</small><strong>${rank}</strong></span><em>${signal}</em></button>`;
+function leagueRow(initials, name, members, rank, signal, route = "/leagues") {
+  return `<button class="league-row" data-route="${route}"><span class="league-mark">${initials}</span><span><strong>${name}</strong><small>${members}</small></span><span class="league-rank"><small>RANK</small><strong>${rank}</strong></span><em>${signal}</em></button>`;
 }
 
 function sportCard(kind, title, subtitle, prize, route) {
@@ -418,6 +433,87 @@ function gameSwitcher(activeGame) {
     ["nfl-pick6", "NFL PICK 6", "NFL", "/nfl-pick6"]
   ];
   return `<nav class="game-switcher" aria-label="Switch games"><div class="game-switcher-inner">${games.map(([id, label, shortLabel, route]) => `<button class="${activeGame === id ? "active" : ""}" data-route="${route}" ${activeGame === id ? 'aria-current="page"' : ""}><span class="game-tab-full">${label}</span><span class="game-tab-short">${shortLabel}</span></button>`).join("")}</div></nav>`;
+}
+
+function leagueSportNav(activeSport) {
+  const sports = [["all", "ALL LEAGUES"], ["racing", "RACING"], ["afl", "AFL"], ["nrl", "NRL"], ["nfl", "NFL"]];
+  return `<nav class="league-sport-nav" aria-label="Leagues by sport"><div class="league-sport-nav-inner">${sports.map(([id, label]) => `<button class="${activeSport === id ? "active" : ""}" data-route="${id === "all" ? "/leagues" : `/leagues/${id}`}" ${activeSport === id ? 'aria-current="page"' : ""}>${label}</button>`).join("")}</div></nav>`;
+}
+
+function playerLeagueCard(league) {
+  const sportLabel = league.sport === "racing" ? "RACING" : league.sport.toUpperCase();
+  const movementClass = league.movement.startsWith("+") ? "up" : "down";
+  return `<button class="player-league-card ${league.sport}" data-action="open-league" data-league="${league.name}">
+    <div class="player-league-card-top"><span class="league-sport-tag">${sportLabel}</span><span>${league.privacy}</span></div>
+    <div class="league-card-identity"><span class="league-large-mark ${league.tone}">${league.initials}</span><div><h3>${league.name}</h3><p>${league.members} members</p></div></div>
+    <div class="league-card-stats"><span><small>YOUR RANK</small><strong>#${league.rank}</strong></span><span><small>MOVEMENT</small><strong class="${movementClass}">${league.movement}</strong></span><span><small>LEADER</small><strong>${league.leader}</strong></span></div>
+    <div class="league-next"><span><small>NEXT GAME</small><strong>${league.deadline}</strong></span><span>OPEN LEAGUE${icon("arrow")}</span></div>
+  </button>`;
+}
+
+function discoverLeagueCard(league) {
+  return `<button class="discover-league-card ${league.sport}" data-action="join-league" data-league="${league.name}">
+    <div><span class="league-large-mark">${league.initials}</span><span class="league-activity-chip">${league.activity}</span></div>
+    <span class="league-sport-tag">${league.sport === "racing" ? "RACING" : league.sport.toUpperCase()}</span>
+    <h3>${league.name}</h3><p>${league.members} · Led by ${league.leader}</p><span class="outline-button small">VIEW LEAGUE${icon("arrow")}</span>
+  </button>`;
+}
+
+function leagueHub(activeSport = "all") {
+  const visiblePlayerLeagues = activeSport === "all" ? playerLeagues : playerLeagues.filter((league) => league.sport === activeSport);
+  const visibleDiscoverLeagues = activeSport === "all" ? discoverLeagues : discoverLeagues.filter((league) => league.sport === activeSport);
+  const featuredLeague = visiblePlayerLeagues[0] || playerLeagues[0];
+  const activeSportLabel = activeSport === "all" ? "ALL SPORTS" : activeSport === "racing" ? "RACING" : activeSport.toUpperCase();
+  return `
+    ${header()}
+    ${leagueSportNav(activeSport)}
+    <main id="app-main" class="league-hub-page">
+      <section class="league-command-hero">
+        <div class="league-command-inner">
+          <div class="league-hero-copy">
+            <button class="back-link" data-route="/dashboard">← Back to dashboard</button>
+            <p class="eyebrow red">WORLDPLAY LEAGUES · ${activeSportLabel}</p>
+            <h1>PLAY TOGETHER.<br><span>PROVE IT.</span></h1>
+            <p>Create private rivalries, join public communities and compare every prediction with the people who matter.</p>
+            <div class="league-hero-actions"><button class="primary-button" data-action="create-league">Create a league</button><button class="ghost-button" data-action="join-league" data-league="a community">Join with a code</button></div>
+          </div>
+          <article class="league-spotlight-card">
+            <div class="league-spotlight-top"><span class="live-dot"></span><small>NEXT LEAGUE ACTION</small><em>${featuredLeague.sport.toUpperCase()}</em></div>
+            <p>${featuredLeague.name}</p><h2>YOU'RE <span>#${featuredLeague.rank}</span> OF ${featuredLeague.members}</h2>
+            <div class="league-spotlight-progress"><span style="width:${Math.max(18, 100 - featuredLeague.rank / featuredLeague.members * 100)}%"></span></div>
+            <div class="league-spotlight-footer"><span><small>NEXT DEADLINE</small><strong>${featuredLeague.deadline}</strong></span><button class="outline-button small" data-action="open-league" data-league="${featuredLeague.name}">View standings${icon("arrow")}</button></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="page-section league-summary-strip" aria-label="League summary">
+        <div><strong>${playerLeagues.length}</strong><span>ACTIVE LEAGUES</span></div><div><strong>90</strong><span>LEAGUE RIVALS</span></div><div><strong>#3</strong><span>BEST RANK</span></div><div><strong>2</strong><span>NEW UPDATES</span></div>
+      </section>
+
+      <section class="page-section league-content-grid">
+        <div class="league-collection">
+          <div class="section-heading"><div><p class="eyebrow red">YOUR COMPETITIONS</p><h2>${activeSport === "all" ? "YOUR LEAGUES" : `${activeSportLabel} LEAGUES`}</h2></div><button class="text-button" data-action="create-league">+ Create league</button></div>
+          ${visiblePlayerLeagues.length ? `<div class="player-league-grid">${visiblePlayerLeagues.map(playerLeagueCard).join("")}</div>` : `<div class="league-empty-state"><span>${icon("trophy")}</span><h3>NO ${activeSportLabel} LEAGUE YET</h3><p>Join a public league or create one for your mates.</p><button class="primary-button small" data-action="create-league">Create league</button></div>`}
+        </div>
+
+        <aside class="league-pulse-panel">
+          <div class="section-heading"><div><p class="eyebrow red">LIVE FEED</p><h2>LEAGUE PULSE</h2></div><span class="pulse-live">LIVE</span></div>
+          <ol class="league-pulse-list">
+            <li><span>01</span><p><strong>@sarah_k</strong> moved into first place in Punt Road Legends.<small>12 min ago · AFL</small></p></li>
+            <li><span>02</span><p><strong>You climbed 5 places</strong> in Spring Carnival after your latest pick.<small>1 hr ago · Racing</small></p></li>
+            <li><span>03</span><p><strong>@fourth_down</strong> posted a perfect NFL card.<small>3 hrs ago · NFL</small></p></li>
+          </ol>
+          <div class="league-invite"><span class="league-large-mark teal">OT</span><div><small>PENDING INVITE</small><strong>Office Footy Tips</strong><p>58 members · NRL</p></div><button data-action="accept-invite" aria-label="Accept Office Footy Tips invite">ACCEPT</button></div>
+        </aside>
+      </section>
+
+      <section class="page-section league-discover-section">
+        <div class="section-heading"><div><p class="eyebrow red">FIND YOUR CROWD</p><h2>DISCOVER ${activeSport === "all" ? "COMMUNITY LEAGUES" : `${activeSportLabel} LEAGUES`}</h2></div><button class="text-button" data-action="join-league" data-league="a community">Browse all →</button></div>
+        <div class="discover-league-grid">${visibleDiscoverLeagues.map(discoverLeagueCard).join("")}</div>
+      </section>
+    </main>
+    ${footer()}
+  `;
 }
 
 function racingHub() {
@@ -761,6 +857,7 @@ function render({ preserveScroll = false } = {}) {
   const route = currentRoute();
   const weeklyMatch = route.match(/^\/(afl-round|nfl-pick6)(?:\/(review|submitted))?$/);
   const dashboardMatch = route.match(/^\/dashboard(?:\/(racing|afl|nrl|nfl|community))?$/);
+  const leagueMatch = route.match(/^\/leagues(?:\/(racing|afl|nrl|nfl))?$/);
   let html;
   if (weeklyMatch) {
     const game = weeklyGameById(weeklyMatch[1]);
@@ -770,6 +867,7 @@ function render({ preserveScroll = false } = {}) {
     else if (phase === "submitted" && entry.submitted) html = weeklySuccessScreen(game);
     else html = entry.submitted && !entry.editing ? weeklySuccessScreen(game) : weeklyGameScreen(game);
   }
+  else if (leagueMatch) html = leagueHub(leagueMatch[1] || "all");
   else if (dashboardMatch) {
     dashboardSport = dashboardMatch[1] || "all";
     html = dashboard();
@@ -786,6 +884,9 @@ function render({ preserveScroll = false } = {}) {
   const gameTabs = document.querySelector(".game-switcher-inner");
   const activeGameTab = gameTabs?.querySelector(".active");
   if (gameTabs && activeGameTab) gameTabs.scrollLeft = Math.max(0, activeGameTab.offsetLeft - (gameTabs.clientWidth - activeGameTab.clientWidth) / 2);
+  const leagueTabs = document.querySelector(".league-sport-nav-inner");
+  const activeLeagueTab = leagueTabs?.querySelector(".active");
+  if (leagueTabs && activeLeagueTab) leagueTabs.scrollLeft = Math.max(0, activeLeagueTab.offsetLeft - (leagueTabs.clientWidth - activeLeagueTab.clientWidth) / 2);
   if (!preserveScroll) window.scrollTo({ top: 0, behavior: "instant" });
 }
 
@@ -868,6 +969,10 @@ document.addEventListener("click", (event) => {
   if (action === "toggle-menu") toggleMenu();
   if (action === "show-rules") { toggleMenu(false); showRules(); }
   if (action === "show-coming-soon") toast("This competition is shown for context — Racing, AFL and NFL prototypes are playable.");
+  if (action === "create-league") toast("The create-a-league flow would open here.");
+  if (action === "join-league") toast(`The join flow for ${target.dataset.league || "this league"} would open here.`);
+  if (action === "open-league") toast(`${target.dataset.league} standings and activity would open here.`);
+  if (action === "accept-invite") toast("League invite accepted for this prototype.");
   if (action === "sport-filter") {
     const sport = target.dataset.sport || "all";
     go(sport === "all" ? "/dashboard" : `/dashboard/${sport}`);
